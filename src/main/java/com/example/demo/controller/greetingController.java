@@ -8,14 +8,14 @@ import com.example.demo.services.GreetingService;
 @RestController
 public class GreetingController {
 
-	GreetingService service;
+	GreetingService greetingService;
 
 	GreetingController(GreetingService serviceArg) {
-		service = serviceArg;
+		this.greetingService = serviceArg;
 	}
 
 	@GetMapping("/greeting")
 	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-		return service.printHello(name);
+		return greetingService.printHello(name);
 	}
 }

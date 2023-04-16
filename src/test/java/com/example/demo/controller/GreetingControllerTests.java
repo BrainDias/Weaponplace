@@ -9,15 +9,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 class GreetingControllerTests {
-	@Mock
-	private GreetingService greetingService;
-	@InjectMocks
-	private GreetingController greetingController;
 
-	@Test
-	void greetingEndpoint() {
-		String name = "Mary";
-		when(greetingService.printHello(name)).thenReturn("Hello Mary!");
-		assertEquals(greetingController.hello(name), "Hello Mary!");
-	}
+    @Mock
+    private GreetingService greetingService;
+    @InjectMocks
+    private GreetingController greetingController;
+
+    @Test
+    void shouldReturnGreetingWithName() {
+        String name = "Mary";
+        when(greetingService.printHello(name)).thenReturn("Hello Mary!");
+        assertEquals(greetingController.hello(name), "Hello Mary!");
+    }
 }

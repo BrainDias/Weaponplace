@@ -11,6 +11,6 @@ public class GreetingServiceImpl implements GreetingService {
     private final UserRepository userRepository;
 
     public String printHello(String name) {
-        return "Hello " + userRepository.findUserByName(name).getTitle() + " " + name + "!";
+        return "Hello " + userRepository.findUserByName(name).getTitle() + name + "!";
     }
 }

@@ -16,7 +16,7 @@ public class GreetingServiceTests {
     @Mock
     private UserRepository userRepository;
     @InjectMocks
-    private GreetingService service;
+    private GreetingServiceImpl service;
 
     @Test
     void greetingServiceTest(){

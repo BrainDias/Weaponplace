@@ -15,7 +15,7 @@ public class GreetingController {
 	}
 
 	@GetMapping("/greeting")
-	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
+	public String hello(@RequestParam(value = "name") String name) {
 		return greetingService.printHello(name);
 	}
 }

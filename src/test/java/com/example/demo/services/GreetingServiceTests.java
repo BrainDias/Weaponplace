@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,7 +22,9 @@ public class GreetingServiceTests {
 
     @Test
     void greetingServiceTest(){
-        Mockito.when(userRepository.findUserByName("Mary")).thenReturn(new User(1L,"Mrs. ","Mary"));
+        when(userRepository.findUserByName("Mary")).thenReturn(new User(1L,"Mrs. ","Mary"));
         Assertions.assertEquals(service.printHello("Mary"),"Hello Mrs. Mary!");
+        verify(userRepository).findUserByName("Mary");
+        verifyNoMoreInteractions(userRepository);
     }
 }

@@ -23,8 +23,8 @@ class GreetingControllerTests {
     @Test
     void shouldReturnGreetingWithName() {
         String name = "Mary";
-        when(greetingService.printHello(name)).thenReturn("Hello Mary!");
-        assertEquals(greetingController.hello(name), "Hello Mary!");
+        when(greetingService.printHello(name)).thenReturn("Hello Mrs. Mary!");
+        assertEquals(greetingController.hello(name), "Hello Mrs. Mary!");
         verify(greetingService).printHello("Mary");
         verifyNoMoreInteractions(greetingService);
     }

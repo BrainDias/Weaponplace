@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.demo.controllers;
 
 import com.example.demo.services.GreetingService;
 import org.junit.jupiter.api.Test;
@@ -9,6 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class GreetingControllerTests {
@@ -23,5 +25,7 @@ class GreetingControllerTests {
         String name = "Mary";
         when(greetingService.printHello(name)).thenReturn("Hello Mary!");
         assertEquals(greetingController.hello(name), "Hello Mary!");
+        verify(greetingService).printHello("Mary");
+        verifyNoMoreInteractions(greetingService);
     }
 }

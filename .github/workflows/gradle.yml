@@ -28,10 +28,10 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Build with Gradle
-      uses: ./gradlew build # v2.6.0
-      with:
-        arguments: build
+    - name: Unit tests
+      run: ./gradlew test
+    - name: Assemble jar
+      run: ./gradlew assemble
     - name: Log in to Docker Hub
       uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
       with:

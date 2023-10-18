@@ -4,12 +4,12 @@ import com.example.demo.entities.ImageEntity;
 
 import java.util.Set;
 
-public interface Weapon extends Product {
-    Caliber caliber = null;
-    Float weight = null;
-    Integer length = null;
-    Set<Accessory> accessories = null;
+public abstract class Weapon extends Product {
 
-    Sight sight = null;
-    ImageEntity image = null;
+    Caliber caliber;
+    Float weight;
+    Integer length;
+    Set<AccessoryType> accessories;
+
+    Sight sight;
 }

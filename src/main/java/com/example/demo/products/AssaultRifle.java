@@ -1,5 +1,5 @@
 package com.example.demo.products;
 
-public class AssaultRifle implements Weapon, AutoFire {
+public class AssaultRifle extends Weapon implements AutoFire {
     Integer barrelLength;
 }

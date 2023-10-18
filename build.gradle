@@ -27,6 +27,7 @@ dependencies {
 //    implementation 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.0.1'
 //    implementation 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1'
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:3.1.2'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

@@ -2,12 +2,14 @@ package com.example.demo.entities;
 
 import com.example.demo.products.Product;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -16,17 +18,17 @@ import java.util.Set;
 public class ProductOrder {
     @Id
     @GeneratedValue
-    Long id;
+    private Long id;
 
     @ManyToOne
             @JoinColumn(name = "buyer_id")
-    User buyer;
+    private User buyer;
     @ManyToOne
             @JoinColumn(name = "seller_id")
-    User seller;
+    private User seller;
 
     @ElementCollection
-    Set<Product> productSet;
+    private List<Product> products;
 
     Float price;
     boolean delivered;

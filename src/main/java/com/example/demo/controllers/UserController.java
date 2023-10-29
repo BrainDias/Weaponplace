@@ -35,7 +35,7 @@ public class UserController {
 
 	//Забанить пользователя от админа
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@PatchMapping("/users/ban/{id}")
+	@PatchMapping("/ban/{id}")
 	//TODO: Make url accessible for admins only
 	public void ban(@PathVariable Long id){
 		userService.banUser(id);

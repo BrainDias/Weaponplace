@@ -1,4 +1,4 @@
 package com.example.demo.products;
 
-public class Pistol extends Weapon implements AutoFire {
+public class Pistol extends Weapon {
 }

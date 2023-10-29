@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Data
@@ -29,7 +28,7 @@ public class Auction {
     @ElementCollection
     private List<Product> products;
 
-    private boolean closed;
+    private Boolean closed;
 
     private Float startPrice;
     private Float lastPrice;
@@ -39,12 +38,12 @@ public class Auction {
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    private Instant updatedAt;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date closingAt;
+    private Instant closingAt;
 }

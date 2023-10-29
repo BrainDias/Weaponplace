@@ -17,13 +17,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.example.demo.services.NotificationService.notifyPendingOrder;
 import static com.example.demo.services.UserService.getUser;
 
 @RequiredArgsConstructor
 @Service
 public class OrderService {
+
     private final OrderRepository orderRepository;
+    private final NotificationService notificationService;
     public Collection<ProductOrder> pageOrders(Pageable pageRequest){
         return (Collection<ProductOrder>) orderRepository.findAll(pageRequest);
     }
@@ -38,7 +39,7 @@ public class OrderService {
     public Optional<List<ProductOrder>> selectedUserOrdersHistory(Long id) {
         User selectedUser = getUser(id);
         if(selectedUser.isOrderHistoryHidden()) return Optional.empty();
-        return Optional.of(selectedUser.getSellingOrders().stream().filter(order -> order.isDelivered()).toList());
+        return Optional.of(selectedUser.getSellingOrders().stream().filter(order -> order.getDelivered()).toList());
     }
 
 
@@ -49,7 +50,7 @@ public class OrderService {
         Stream<Product> productsForSale = sellerProducts.stream().filter(product -> product.forSale);
         if(!products.stream().allMatch(product -> productsForSale.toList().contains(product))) return HttpStatus.BAD_REQUEST;
         createOrder(buyer, products, seller, sellerProducts);
-        notifyPendingOrder(seller);
+        notificationService.notifyPendingOrder(seller);
         return HttpStatus.CREATED;
     }
 

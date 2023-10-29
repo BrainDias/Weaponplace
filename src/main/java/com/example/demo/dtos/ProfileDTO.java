@@ -8,6 +8,6 @@ public class ProfileDTO {
     private String username;
     //    @Email
     private String email;
-    private boolean active;
+    private Boolean active;
     private Set<GrantedAuthority> Authorities;
 }

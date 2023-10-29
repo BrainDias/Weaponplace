@@ -10,6 +10,7 @@ import com.example.demo.repositories.AuctionRepository;
 import com.example.demo.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -19,7 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +33,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 @SpringBootTest
 public class AuctionServiceTest {
 
+    @InjectMocks
     private AuctionService auctionService;
 
     @Mock
@@ -43,7 +45,6 @@ public class AuctionServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        auctionService = new AuctionService(auctionRepository, userRepository);
     }
 
     @Test
@@ -82,8 +83,9 @@ public class AuctionServiceTest {
             return savedAuction;
         });
 
+        //TODO: test should process Auction object not DTO
         // Act
-        auctionService.createAuction(owner, dto, startPrice, title);
+        auctionService.createAuction(owner, dto);
 
         // Assert
         assertEquals(1, owner.getOwnedAuctions().size());
@@ -118,7 +120,7 @@ public class AuctionServiceTest {
         when(auctionRepository.findAll()).thenReturn(openAuctions);
 
         // Set the closing time of the auctions to a past time
-        Date pastTime = new Date(System.currentTimeMillis() - 10000);
+        Instant pastTime = new Instant(System.currentTimeMillis() - 10000);
         auction1.setClosingAt(pastTime);
         auction2.setClosingAt(pastTime);
 
@@ -129,8 +131,8 @@ public class AuctionServiceTest {
         auctionService.closeAuctions();
 
         // Assert
-        assertEquals(true, auction1.isClosed());
-        assertEquals(true, auction2.isClosed());
+        assertEquals(true, auction1.getClosed());
+        assertEquals(true, auction2.getClosed());
         // Add more assertions as needed
     }
 
@@ -156,7 +158,7 @@ public class AuctionServiceTest {
         auctionService.endAuctions(Streamable.of(testAuction));
 
         // Assert or verify your expectations
-        assertTrue(testAuction.isClosed());
+        assertTrue(testAuction.getClosed());
         verify(userRepository).save(pretender);
         // Add more verifications or assertions as needed
     }
@@ -180,7 +182,7 @@ public class AuctionServiceTest {
         assertEquals(HttpStatus.ACCEPTED, result);
         assertEquals(pretender, auction.getPretender());
         assertEquals(150.0f, auction.getLastPrice());
-        assertTrue(auction.isClosed());
+        assertTrue(auction.getClosed());
     }
 
     @Test

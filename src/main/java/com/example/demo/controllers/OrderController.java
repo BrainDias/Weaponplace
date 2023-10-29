@@ -21,6 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
     private final DtoMapper mapper;
@@ -34,26 +35,26 @@ public class OrderController {
 
     //Заказы данного пользователя
     @ResponseStatus(HttpStatus.FOUND)
-    @GetMapping("/orders/buying")
+    @GetMapping("/buying")
     public List<ProductOrderDTO> currentUserBuyingOrders(@AuthenticationPrincipal User currentUser){
         return mapCollectionToDto(currentUser.getBuyingOrders());
     }
 
     @ResponseStatus(HttpStatus.FOUND)
-    @GetMapping("/orders/selling")
+    @GetMapping("/selling")
     public List<ProductOrderDTO> currentUserSellingOrders(@AuthenticationPrincipal User currentUser){
         return mapCollectionToDto(currentUser.getSellingOrders());
     }
 
     @ResponseStatus(HttpStatus.FOUND)
-    @GetMapping("/orders/admin")
+    @GetMapping("/admin")
     //TODO: Return Specifical DTOs for admins
     public List<ProductOrderDTO> ordersAdmin(@RequestBody PageRequest pageRequest){
         return mapCollectionToDto(orderService.pageOrders(pageRequest));
     }
 
     //Посмотреть проданные товары выбранного пользователя, если он разрешил такой просмотр
-    @GetMapping("/orders/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<List<ProductOrderDTO>> selectedUserOrdersHistory(@PathVariable Long id){
         Optional<List<ProductOrder>> productOrders = orderService.selectedUserOrdersHistory(id);
         if(productOrders.isEmpty()) return new ResponseEntity<>(HttpStatus.LOCKED);
@@ -61,9 +62,9 @@ public class OrderController {
         return new ResponseEntity<>(dtos,HttpStatus.FOUND);
     }
 
-    @PostMapping("/orders/{seller_id}")
-    public HttpStatusCode makeOrder(@AuthenticationPrincipal User buyer, @PathVariable Long seller_id, @RequestBody List<Product> products ) throws MessagingException {
-        return orderService.makeOrder(buyer,products, seller_id);
+    @PostMapping("/{sellerId}")
+    public HttpStatusCode makeOrder(@AuthenticationPrincipal User buyer, @PathVariable Long sellerId, @RequestBody List<Product> products ) throws MessagingException {
+        return orderService.makeOrder(buyer,products, sellerId);
     }
 
     List<ProductOrderDTO> mapCollectionToDto(Collection<ProductOrder> orders){

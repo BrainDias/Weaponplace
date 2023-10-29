@@ -10,6 +10,6 @@ public abstract class Weapon extends Product {
     Float weight;
     Integer length;
     Set<AccessoryType> accessories;
-
+    Integer rateOfFire;
     Sight sight;
 }

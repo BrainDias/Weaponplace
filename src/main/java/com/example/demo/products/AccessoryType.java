@@ -1,5 +1,5 @@
 package com.example.demo.products;
 
 public enum AccessoryType {
-    Light, Muzzle_Device, Grip
+    LIGHT, MUZZLE_DEVICE, GRIP
 }

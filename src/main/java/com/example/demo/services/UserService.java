@@ -34,14 +34,8 @@ public class UserService {
         });
     }
 
-    public void addProduct(User user, ProductDTO product, String productType) {
-        switch (productType){
-            case "ammo"-> user.getProducts().add(mapper.productDtoToAmmo(product));
-            case "ar"-> user.getProducts().add(mapper.productDtoToAr(product));
-            case "mg"-> user.getProducts().add(mapper.productDtoToMachinegun(product));
-            case "pistol"-> user.getProducts().add(mapper.productDtoToPistol(product));
-            case "sniper"-> user.getProducts().add(mapper.productDtoToSniperRifle(product));
-        }
+    public void addProduct(User user, Product product) {
+        user.getProducts().add(product);
         userRepository.save(user);
     }
 

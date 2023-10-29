@@ -2,27 +2,31 @@ package com.example.demo.controllers;
 
 import com.example.demo.dtos.AuctionDTO;
 import com.example.demo.entities.User;
+import com.example.demo.mappers.DtoMapper;
 import com.example.demo.services.AuctionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/auction")
 public class AuctionController {
-    private final AuctionService auctionService;
 
-    @PostMapping("/auction")
+    private final AuctionService auctionService;
+    private final DtoMapper mapper;
+
+    @PostMapping("/")
+    @ResponseStatus(HttpStatus.CREATED)
     public void createAuction(@AuthenticationPrincipal User owner,
-                                        @RequestBody AuctionDTO dto,
-                                        @RequestParam Float startPrice,
-                                        @RequestParam String title){
-        auctionService.createAuction(owner,dto,startPrice,title);
+                                        @RequestBody AuctionDTO dto){
+        auctionService.createAuction(owner,mapper.auctionDtoToAuction(dto));
     }
 
-    @PutMapping("/bid/{auction_id}")
-    public HttpStatusCode placeBidToAuction(@AuthenticationPrincipal User pretender,@RequestParam Float price,@PathVariable Long auction_id){
-        return auctionService.placeBidToAuction(pretender,price,auction_id);
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PutMapping("{auctionId}/bid")
+    public void placeBidToAuction(@AuthenticationPrincipal User pretender,@RequestBody Float price,@PathVariable Long auctionId){
+        auctionService.placeBidToAuction(pretender,price, auctionId);
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -26,16 +26,16 @@ public class User implements UserDetails {
 
 //    @Email
     private String email;
-    private boolean active;
+    private Boolean active;
     private boolean orderHistoryHidden;
     @ElementCollection
     private Set<GrantedAuthority> authorities;
     @ElementCollection
     private List<Product> products;
     @OneToMany(mappedBy = "buyer")
-    private Set<ProductOrder> buyingOrders;
+    private List<ProductOrder> buyingOrders;
     @OneToMany(mappedBy = "seller")
-    private Set<ProductOrder> sellingOrders;
+    private List<ProductOrder> sellingOrders;
     @OneToMany(mappedBy = "owner")
     private Set<Auction> ownedAuctions;
     @OneToMany(mappedBy = "pretender")
@@ -45,11 +45,11 @@ public class User implements UserDetails {
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    private Instant updatedAt;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Верните список ролей или прав доступа пользователя

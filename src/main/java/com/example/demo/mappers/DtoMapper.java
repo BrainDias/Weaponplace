@@ -1,8 +1,10 @@
 package com.example.demo.mappers;
 
+import com.example.demo.dtos.AuctionDTO;
 import com.example.demo.dtos.ProductDTO;
 import com.example.demo.dtos.ProductOrderDTO;
 import com.example.demo.dtos.ProfileDTO;
+import com.example.demo.entities.Auction;
 import com.example.demo.entities.ProductOrder;
 import com.example.demo.entities.User;
 import com.example.demo.products.*;
@@ -32,4 +34,6 @@ public interface DtoMapper {
     Pistol productToPistol(Product product);
 
     SniperRifle productToSniperRifle(Product product);
+
+    Auction auctionDtoToAuction(AuctionDTO dto);
 }

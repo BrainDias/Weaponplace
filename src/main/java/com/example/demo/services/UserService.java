@@ -59,13 +59,16 @@ public class UserService {
 
     public List<? extends Product> otherUserProducts(Long id, String productType) {
         User user = getUser(id);
-        Stream<Product> productStream = user.getProducts().stream().filter(product -> product.getClass().getName().equals(productType)&&(!product.hidden));
+        Stream<Product> productStream = user.getProducts().stream().filter(checkProductTypeAndVisibility(productType));
         return mapToType(productStream,productType);
     }
 
+    private boolean checkProductTypeAndVisibility(String productType) {
+        return product -> product.getClass().getName().equals(productType) && (!product.hidden);
+    }
+
     public static User getUser(Long id) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if(optionalUser.isEmpty()) throw new IllegalArgumentException("User doesn't exist");
+        Optional<User> optionalUser = userRepository.findById(id).orElseThrow(() -> new IllegalStateException("User doesn't exist"));
         User selectedUser = optionalUser.get();
         return selectedUser;
     }

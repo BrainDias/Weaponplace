@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -59,27 +59,25 @@ public class UserService {
 
     public List<? extends Product> otherUserProducts(Long id, String productType) {
         User user = getUser(id);
-        Stream<Product> productStream = user.getProducts().stream().filter(checkProductTypeAndVisibility(productType));
-        return mapToType(productStream,productType);
+        List<Product> productList = user.getProducts().stream().filter(checkProductTypeAndVisibility(productType)).toList();
+        return mapToType(productList,productType);
     }
 
-    private boolean checkProductTypeAndVisibility(String productType) {
+    private Predicate<? super Product> checkProductTypeAndVisibility(String productType) {
         return product -> product.getClass().getName().equals(productType) && (!product.hidden);
     }
 
     public static User getUser(Long id) {
-        Optional<User> optionalUser = userRepository.findById(id).orElseThrow(() -> new IllegalStateException("User doesn't exist"));
-        User selectedUser = optionalUser.get();
-        return selectedUser;
+        return userRepository.findById(id).orElseThrow(() -> new IllegalStateException("User doesn't exist"));
     }
-    public List<? extends Product> mapToType(Stream<Product> productStream, String productType) {
+    public List<? extends Product> mapToType(List<Product> productList, String productType) {
         switch (productType){
-            case "ammo"-> productStream.map(product -> mapper.productToAmmo(product));
-            case "ar"-> productStream.map(product -> mapper.productToAr(product));
-            case "mg"-> productStream.map(product -> mapper.productToMachinegun(product));
-            case "pistol"-> productStream.map(product -> mapper.productToPistol(product));
-            case "sniper"-> productStream.map(product -> mapper.productToSniperRifle(product));
+            case "ammo"-> productList.stream().map(product -> mapper.productToAmmo(product));
+            case "ar"-> productList.stream().map(product -> mapper.productToAr(product));
+            case "mg"-> productList.stream().map(product -> mapper.productToMachinegun(product));
+            case "pistol"-> productList.stream().map(product -> mapper.productToPistol(product));
+            case "sniper"-> productList.stream().map(product -> mapper.productToSniperRifle(product));
         }
-        return productStream.toList();
+        return productList;
     }
 }

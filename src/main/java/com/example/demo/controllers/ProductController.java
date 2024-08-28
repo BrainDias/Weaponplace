@@ -4,6 +4,7 @@ import com.example.demo.dtos.ProductDTO;
 import com.example.demo.entities.User;
 import com.example.demo.mappers.DtoMapper;
 import com.example.demo.products.Product;
+import com.example.demo.products.ProductType;
 import com.example.demo.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Stream;
 
+//TODO: отфильтрованный список продуктов на продажу, фильтрация объявлений на продажу по отзывам на продавцов, по релевантности, возрастанию цены, убыванию цены
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/products")
@@ -23,27 +25,20 @@ public class ProductController {
 
     @SneakyThrows
     @GetMapping("/")
-    public List<? extends Product> currentUserProducts(@AuthenticationPrincipal User user, @RequestParam String productType){
-        Stream<Product> productStream = user.getProducts().stream().filter(product -> product.getClass().getName().equals(productType));
-        return userService.mapToType(productStream,productType);
+    public List<Product> currentUserProducts(@AuthenticationPrincipal User user, @RequestParam ProductType productType){
+        return userService.mapToType(user,productType);
     }
 
+    //TODO: сделать фильтр по forSale
     @GetMapping("/{id}")
-    public List<? extends Product> otherUserProducts(@PathVariable Long id,@RequestParam String productType){
+    public List<Product> otherUserProducts(@PathVariable Long id,@RequestParam ProductType productType){
         return userService.otherUserProducts(id,productType);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping("")
-    public void addProduct(@AuthenticationPrincipal User user, @RequestBody ProductDTO productDTO, @RequestParam String productType){
-        Product product = null;
-        switch (productType){
-            case "ammo"-> product = mapper.productDtoToAmmo(productDTO);
-            case "ar"-> product = mapper.productDtoToAr(productDTO);
-            case "mg"-> product = mapper.productDtoToMachinegun(productDTO);
-            case "pistol"-> product = mapper.productDtoToPistol(productDTO);
-            case "sniper"-> product = mapper.productDtoToSniperRifle(productDTO);
-        }
+    public void addProduct(@AuthenticationPrincipal User user, @RequestBody ProductDTO productDto){
+        Product product = mapper.productDtoToProduct(productDto);
         userService.addProduct(user,product);
     }
 
@@ -55,7 +50,8 @@ public class ProductController {
 
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/{index}")
-    public void updateProduct(@AuthenticationPrincipal User user,@PathVariable int index,@RequestBody ProductDTO product){
+    public void updateProduct(@AuthenticationPrincipal User user,@PathVariable int index,@RequestBody ProductDTO productDto){
+        Product product = mapper.productDtoToProduct(productDto);
         userService.updateProduct(user, index,product);
     }
 }

@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
+//TODO: Возможность скрыть номер телефона, привязка банковской карты, рейтинг по процентам положительных отзывов или шкале
 @Data
 @Entity
 @NoArgsConstructor
@@ -40,8 +41,8 @@ public class User implements UserDetails {
     private Set<Auction> ownedAuctions;
     @OneToMany(mappedBy = "pretender")
     private Set<Auction> pretendingAuctions;
-    @OneToOne(mappedBy = "user")
-    private ImageEntity avatar;
+    @Lob
+    private byte[] avatar;
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)

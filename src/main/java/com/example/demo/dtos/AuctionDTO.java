@@ -12,5 +12,6 @@ public class AuctionDTO {
     String description;
     String title;
     Float startPrice;
+    Float priceStep;
     Instant closingAt;
 }

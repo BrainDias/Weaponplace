@@ -15,25 +15,7 @@ public interface DtoMapper {
     ProfileDTO userToDto(User user);
     ProductOrderDTO orderToDto(ProductOrder order);
 
-    Ammo productDtoToAmmo(ProductDTO product);
-
-    AssaultRifle productDtoToAr(ProductDTO product);
-
-    MachineGun productDtoToMachinegun(ProductDTO product);
-
-    Pistol productDtoToPistol(ProductDTO product);
-
-    SniperRifle productDtoToSniperRifle(ProductDTO product);
-
-    Ammo productToAmmo(Product product);
-
-    AssaultRifle productToAr(Product product);
-
-    MachineGun productToMachinegun(Product product);
-
-    Pistol productToPistol(Product product);
-
-    SniperRifle productToSniperRifle(Product product);
+    Product productDtoToProduct(ProductDTO product);
 
     Auction auctionDtoToAuction(AuctionDTO dto);
 }

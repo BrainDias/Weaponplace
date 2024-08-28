@@ -27,6 +27,10 @@ public class OrderController {
     private final DtoMapper mapper;
     //Подтверждаем доставку
 
+    //TODO: проверять что пользователь владелец вещи, сделать аналог OLX доставки, так, чтобы заказ закрывался когда покупатель забирает заказ, а перед этим
+    //TODO: он переводил деньги через систему на карту продавца которую он не видит, а там они блокировались
+    //TODO: закрывать ордер по нажатию конпки отмена покупателя ИЛИ продавца, по успешному завершению ордера отправлять на электронную почту просьбу оставить отзыв, или
+    //TODO: прямо сразу же в приложении
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PatchMapping("/delivered/{id}")
     public void closeOrder(@PathVariable Long id){
@@ -62,6 +66,7 @@ public class OrderController {
         return new ResponseEntity<>(dtos,HttpStatus.FOUND);
     }
 
+    //TODO: Спрашивать согласия у продавца на открытие ордера
     @PostMapping("/{sellerId}")
     public HttpStatusCode makeOrder(@AuthenticationPrincipal User buyer, @PathVariable Long sellerId, @RequestBody List<Product> products ) throws MessagingException {
         return orderService.makeOrder(buyer,products, sellerId);

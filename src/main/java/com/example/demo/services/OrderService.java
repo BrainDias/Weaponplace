@@ -47,7 +47,7 @@ public class OrderService {
         User seller = getUser(user_id);
         Class<?> productType = products.getClass().arrayType();
         List<Product> sellerProducts = seller.getProducts();
-        Stream<Product> productsForSale = sellerProducts.stream().filter(product -> product.forSale);
+        Stream<Product> productsForSale = sellerProducts.stream().filter(product -> product.isForSale());
         if(!products.stream().allMatch(product -> productsForSale.toList().contains(product))) return HttpStatus.BAD_REQUEST;
         createOrder(buyer, products, seller, sellerProducts);
         notificationService.notifyPendingOrder(seller);
@@ -65,7 +65,7 @@ public class OrderService {
         Float price=0f;
         for (Product product :
                 products) {
-            price+=product.price;
+            price+=product.getPrice();
         }
         newOrder.setPrice(price);
         newOrder.setProducts(products);

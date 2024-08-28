@@ -32,6 +32,7 @@ public class Auction {
 
     private Float startPrice;
     private Float lastPrice;
+    private Float priceStep;
 
     private String title; // Название аукциона
     private String description; // Описание аукциона

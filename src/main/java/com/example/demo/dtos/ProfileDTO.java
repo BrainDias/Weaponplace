@@ -10,4 +10,6 @@ public class ProfileDTO {
     private String email;
     private Boolean active;
     private Set<GrantedAuthority> Authorities;
+
+    private byte[] avatar;
 }

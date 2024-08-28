@@ -3,8 +3,6 @@ package com.example.demo.services;
 import com.example.demo.dtos.AuctionDTO;
 import com.example.demo.entities.Auction;
 import com.example.demo.entities.User;
-import com.example.demo.products.Ammo;
-import com.example.demo.products.AssaultRifle;
 import com.example.demo.products.Product;
 import com.example.demo.repositories.AuctionRepository;
 import com.example.demo.repositories.UserRepository;

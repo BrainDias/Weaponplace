@@ -3,7 +3,6 @@ package com.example.demo.services;
 import com.example.demo.dtos.ProductDTO;
 import com.example.demo.entities.User;
 import com.example.demo.mappers.DtoMapper;
-import com.example.demo.products.Ammo;
 import com.example.demo.products.Product;
 import com.example.demo.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;

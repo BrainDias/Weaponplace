@@ -7,6 +7,7 @@ import com.example.demo.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +30,10 @@ public class UserController {
 	@ResponseStatus(HttpStatus.FOUND)
 	@GetMapping("/users")
 	//TODO: Return Specifical DTOs for admins
-	public Page<User> users(@RequestBody PageRequest pageRequest){
-		return userService.pageUsers(pageRequest);
+	//TODO: Фильтрация по наличию определенных продуктов
+	public Page<User> users(@RequestParam int pageNum, @RequestParam int size){
+		Pageable pageable = PageRequest.of(pageNum, size);
+		return userService.pageUsers(pageable);
 	}
 
 	//Забанить пользователя от админа

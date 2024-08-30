@@ -1,24 +1,26 @@
 package com.example.demo.products;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Lob;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.Set;
 
 @Embeddable
+@EntityListeners(AuditingEntityListener.class)
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL) // Исключает null-поля при сериализации
 public class Product {
     Float price;
     String name;
     Integer qty;
+
+    //For single accessories
+    AccessoryType accessoryType;
 
     boolean forSale;
 
@@ -39,7 +41,7 @@ public class Product {
     //Weapons only
     Float weight;
     Integer length;
-    Set<AccessoryType> accessories;
+    AccessoryType accessories;
     Integer rateOfFire;
     WeaponType weaponType;
     //MG and sniper rifle only

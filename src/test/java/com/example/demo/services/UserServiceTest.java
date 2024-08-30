@@ -1,29 +1,31 @@
 package com.example.demo.services;
 
-import com.example.demo.dtos.ProductDTO;
+import com.example.demo.filters.ProductFilter;
 import com.example.demo.entities.User;
-import com.example.demo.mappers.DtoMapper;
+import com.example.demo.enums.SortingType;
 import com.example.demo.products.Product;
+import com.example.demo.products.ProductType;
 import com.example.demo.repositories.UserRepository;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
 public class UserServiceTest {
 
     @InjectMocks
@@ -32,160 +34,91 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private DtoMapper mapper;
+
+
+    private User user;
+    private User anotherUser;
+
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        user = new User();
+        anotherUser = new User();
+
+
+        // Initialize user
+        user.setRating(4.0f);
+        user.setRatingsNumber(5);
+        anotherUser.setWishFilters(new ArrayList<>());
     }
 
     @Test
-    public void testPageUsers() {
-        // Arrange
-        Pageable pageRequest = PageRequest.of(0, 10);
-        List<User> users = new ArrayList<>(); // Create a list of users
+    void testPageUsers() {
+        Pageable pageable = Pageable.ofSize(10);
+        List<User> users = new ArrayList<>();
+        Page<User> page = new PageImpl<>(users);
+        when(userRepository.findAll(pageable)).thenReturn(page);
 
-        // Mock the repository's findAll method
-        Mockito.when(userRepository.findAll(pageRequest)).thenReturn(Page.empty());
+        Page<User> result = userService.pageUsers(pageable);
 
-        // Act
-        Page<User> result = userService.pageUsers(pageRequest);
+        assertEquals(page, result);
+        verify(userRepository).findAll(pageable);
+    }
 
-        // Assert
+    @Test
+    void testBanUser() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+
+        userService.banUser(1L);
+
+        verify(userRepository).findById(anyLong());
+        verify(userRepository).save(user);
+        assertFalse(user.isEnabled());
+    }
+
+
+
+    @Test
+    void testGetUser() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+
+        User result = userService.getUser(1L);
+
         assertNotNull(result);
-        assertEquals(0, result.getTotalElements());
+        assertEquals(user, result);
+        verify(userRepository).findById(anyLong());
     }
 
     @Test
-    public void testBanUser() {
-        // Arrange
-        Long userId = 1L;
-        User user = new User();
-        user.setId(userId);
-        user.setActive(true);
+    void testGetUserNotFound() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Mock the repository methods
-        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        Mockito.when(userRepository.save(user)).thenReturn(user);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.getUser(1L));
+        assertEquals("User doesn't exist", thrown.getMessage());
+        verify(userRepository).findById(anyLong());
+    }
 
-        // Act
-        userService.banUser(userId);
 
-        // Assert
-        assertFalse(user.isActive());
-        // Verify that save method was called
-        Mockito.verify(userRepository, times(1)).save(user);
+
+    @Test
+    void testUpdateRating() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+
+        userService.updateRating(1L, 5);
+
+        assertEquals(4.2f, user.getRating());
+        assertEquals(6, user.getRatingsNumber());
+        verify(userRepository).save(user);
     }
 
     @Test
-    public void testAddProduct() {
-        // Arrange
-        User user = new User();
-        ProductDTO productDto = new ProductDTO();
-        Product product = new Ammo();
+    void testUpdateRatingUserNotFound() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Mock the repository methods and mapper
-        Mockito.when(userRepository.save(user)).thenReturn(user);
-        Mockito.when(mapper.productDtoToAmmo(productDto)).thenReturn((Ammo) product);
-
-        // Act
-        userService.addProduct(user, productDto);
-
-        // Assert
-        assertEquals(1, user.getProducts().size());
-        // Verify that save method was called
-        Mockito.verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
-    public void testDeleteProduct() {
-        // Arrange
-        User user = new User();
-        Product product = new Ammo();
-        user.getProducts().add(product);
-        int index = 0;
-
-        // Mock the repository method
-        Mockito.when(userRepository.save(user)).thenReturn(user);
-
-        // Act
-        userService.deleteProduct(user, index);
-
-        // Assert
-        assertEquals(0, user.getProducts().size());
-        // Verify that save method was called
-        Mockito.verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
-    public void testUpdateProduct() {
-        // Arrange
-        User user = new User();
-        user.setId(1L);
-        List<Product> products = new ArrayList<>();
-        products.add(new Ammo()); // You may need to create instances of different Product subclasses
-        user.setProducts(products);
-        int index = 0;
-        ProductDTO productDTO = new ProductDTO();
-
-        // Mock the mapper to return a new instance of the updated product
-        Ammo updatedAmmo = new Ammo();
-        Mockito.when(mapper.productDtoToAmmo(productDTO)).thenReturn(updatedAmmo);
-
-        // Mock the UserRepository
-        Mockito.when(userRepository.save(user)).thenReturn(user);
-
-        // Act
-        userService.updateProduct(user, index, productDTO);
-
-        // Assert
-        // Verify that the mapper method was called
-        Mockito.verify(mapper, times(1)).productDtoToAmmo(productDTO);
-
-        // Verify that the product at the specified index has been updated
-        Product updatedProduct = user.getProducts().get(index);
-        assertEquals(updatedAmmo, updatedProduct);
-    }
-
-    @Test
-    public void testOtherUserProducts() {
-        // Arrange
-        Long userId = 1L;
-        User user = new User();
-        user.setId(userId);
-        Product product1 = new Ammo();
-        Product product2 = new Ammo();
-        product2.setHidden(true);
-        user.getProducts().add(product1);
-        user.getProducts().add(product2);
-
-        String productType = "ammo";
-
-        // Act
-        List<? extends Product> result = userService.otherUserProducts(userId, productType);
-
-        // Assert
-        assertEquals(1, result.size());
-        assertFalse(result.get(0).isHidden());
-    }
-
-    @Test
-    public void testGetUser() {
-        // Arrange
-        Long userId = 1L;
-        User user = new User();
-        user.setId(userId);
-
-        // Mock the repository method
-        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        // Act
-        User result = userService.getUser(userId);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(userId, result.getId());
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.updateRating(1L, 5));
+        assertEquals("User not found", thrown.getMessage());
+        verify(userRepository, never()).save(any(User.class));
     }
 }
 

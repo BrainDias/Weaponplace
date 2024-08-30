@@ -17,5 +17,9 @@ public interface DtoMapper {
 
     Product productDtoToProduct(ProductDTO product);
 
+    ProductDTO productToDto(Product product);
+
     Auction auctionDtoToAuction(AuctionDTO dto);
+
+    AuctionDTO auctionToAuctionDto(Auction auction);
 }

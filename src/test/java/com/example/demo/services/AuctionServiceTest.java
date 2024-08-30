@@ -1,34 +1,28 @@
 package com.example.demo.services;
 
-import com.example.demo.dtos.AuctionDTO;
 import com.example.demo.entities.Auction;
 import com.example.demo.entities.User;
+import com.example.demo.filters.AuctionFilter;
 import com.example.demo.products.Product;
 import com.example.demo.repositories.AuctionRepository;
 import com.example.demo.repositories.UserRepository;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.ArgumentCaptor;
 import org.springframework.data.util.Streamable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import static feign.ReflectiveFeign.TargetSpecificationVerifier.verify;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
 public class AuctionServiceTest {
 
     @InjectMocks
@@ -40,179 +34,114 @@ public class AuctionServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private NotificationService notificationService;
+
+    private User owner;
+    private User pretender;
+    private Auction auction;
+    private List<Product> products;
+
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        owner = new User();
+        pretender = new User();
+        auction = new Auction();
+        products = new ArrayList<>();
+
+        Product product = new Product();
+        product.setName("Product 1");
+        products.add(product);
+
+        auction.setProducts(products);
     }
 
     @Test
-    public void testCreateAuction() {
-        // Arrange
-        User owner = new User();
-        owner.setId(1L);
+    @Transactional
+    void testCreateAuction() {
+        // Выполняем вызов метода
+        auctionService.createAuction(owner, auction);
 
-        AuctionDTO dto = new AuctionDTO();
-        Float startPrice = 100.0f;
-        String title = "Test Auction";
+        // Проверяем, что владелец был сохранен с обновленным списком продуктов
+        verify(userRepository).save(owner);
 
-        // Create a list of products
-        List<Product> products = new ArrayList<>();
+        // Проверяем, что аукцион был сохранен
+        verify(auctionRepository).save(auction);
 
-        // Create product instances
-        Ammo ammo = new Ammo();
-        ammo.setPrice(10.0f);
-        ammo.setForSale(true);
-        ammo.setHidden(false);
-
-        AssaultRifle ar = new AssaultRifle();
-        ar.setPrice(50.0f);
-        ar.setForSale(true);
-        ar.setHidden(false);
-
-        // Add products to the list
-        products.add(ammo);
-        products.add(ar);
-
-        // Mock the repository's save methods
-        when(userRepository.save(owner)).thenReturn(owner);
-        when(auctionRepository.save(Mockito.any(Auction.class))).thenAnswer(invocation -> {
-            Auction savedAuction = invocation.getArgument(0);
-            savedAuction.setId(1L); // Set an ID for the saved auction
-            return savedAuction;
-        });
-
-        //TODO: test should process Auction object not DTO
-        // Act
-        auctionService.createAuction(owner, dto);
-
-        // Assert
-        assertEquals(1, owner.getOwnedAuctions().size());
-
-        Auction createdAuction = owner.getOwnedAuctions().iterator().next();
-        assertNotNull(createdAuction);
-        assertEquals(owner, createdAuction.getOwner());
-        assertEquals(startPrice, createdAuction.getStartPrice());
-        assertEquals(title, createdAuction.getTitle());
-        assertEquals(dto.getDescription(), createdAuction.getDescription());
-
-        // Verify that save methods were called
-        Mockito.verify(userRepository, times(1)).save(owner);
-        Mockito.verify(auctionRepository, times(1)).save(Mockito.any(Auction.class));
-
-        // Additional assertions for products
-        List<Product> auctionProducts = createdAuction.getProducts();
-        assertEquals(2, auctionProducts.size());
-        assertTrue(auctionProducts.contains(ammo));
-        assertTrue(auctionProducts.contains(ar));
+        assertFalse(auction.getClosed());
+        assertEquals(owner, auction.getOwner());
     }
+
     @Test
-    public void testCloseAuctions() {
-        // Arrange
-        Auction auction1 = new Auction();
-        Auction auction2 = new Auction();
-        List<Auction> openAuctions = new ArrayList<>();
-        openAuctions.add(auction1);
-        openAuctions.add(auction2);
+    void testCloseAuctions() {
+        Streamable<Auction> auctionsToClose = mock(Streamable.class);
 
-        // Mock the repository to return open auctions
-        when(auctionRepository.findAll()).thenReturn(openAuctions);
+        when(auctionRepository.findToClose()).thenReturn(auctionsToClose);
 
-        // Set the closing time of the auctions to a past time
-        Instant pastTime = new Instant(System.currentTimeMillis() - 10000);
-        auction1.setClosingAt(pastTime);
-        auction2.setClosingAt(pastTime);
-
-        // Mock the repository's save method
-        when(auctionRepository.saveAll(Mockito.any())).thenReturn(new ArrayList<>());
-
-        // Act
+        // Выполняем вызов метода
         auctionService.closeAuctions();
 
-        // Assert
-        assertEquals(true, auction1.getClosed());
-        assertEquals(true, auction2.getClosed());
-        // Add more assertions as needed
+        // Проверяем, что метод endAuctions был вызван
+        verify(auctionRepository).findToClose();
+        verify(auctionService).endAuctions(auctionsToClose);
     }
 
     @Test
-    public void testEndAuctions() {
-        // Create test data
-        User pretender = new User();
-        List<Product> products = new ArrayList<>();
-        // Add products to the list
-        // Create a test auction with the above data
-        Auction testAuction = new Auction();
-        testAuction.setPretender(pretender);
-        testAuction.setProducts(products);
+    @Transactional
+    void testEndAuctions() throws MessagingException {
+        // Настраиваем аукцион
+        auction.setPretender(pretender);
 
-        // Mock repository methods
-        when(auctionRepository.saveAll(anyList())).thenAnswer(invocation -> {
-            List<Auction> savedAuctions = invocation.getArgument(0);
-            // Here you can assert or manipulate the saved auctions as needed.
-            return savedAuctions;
-        });
+        Streamable<Auction> auctionsToClose = Streamable.of(auction);
 
-        // Execute the method
-        auctionService.endAuctions(Streamable.of(testAuction));
+        // Выполняем вызов метода
+        auctionService.endAuctions(auctionsToClose);
 
-        // Assert or verify your expectations
-        assertTrue(testAuction.getClosed());
-        verify(userRepository).save(pretender);
-        // Add more verifications or assertions as needed
-    }
+        // Проверяем, что претендент получил товары
+        assertTrue(pretender.getProducts().containsAll(products));
 
-    @Test
-    public void testPlaceBidToAuction() {
-        // Create test data
-        User pretender = new User();
-        Auction auction = new Auction();
-        auction.setLastPrice(100.0f);
-        auction.setClosed(false);
-
-        // Mock repository methods
-        when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(auctionRepository.save(auction)).thenReturn(auction);
-
-        // Execute the method
-        HttpStatusCode result = auctionService.placeBidToAuction(pretender, 150.0f, 1L);
-
-        // Assert or verify your expectations
-        assertEquals(HttpStatus.ACCEPTED, result);
-        assertEquals(pretender, auction.getPretender());
-        assertEquals(150.0f, auction.getLastPrice());
+        // Проверяем, что аукцион был закрыт
         assertTrue(auction.getClosed());
+
+        // Проверяем, что уведомление было отправлено
+        verify(notificationService).notifyAuctionClosed(owner, pretender);
+
+        // Проверяем, что претендент был сохранен
+        verify(userRepository).save(pretender);
+
+        // Проверяем, что аукционы были сохранены
+        verify(auctionRepository).saveAll(auctionsToClose);
     }
 
     @Test
-    public void testPlaceBidToAuctionAuctionNotFound() {
-        // Create test data
-        User pretender = new User();
+    void testPlaceBidToAuction() {
+        Long auctionId = 1L;
+        Float price = 100.0f;
 
-        // Mock repository methods
-        when(auctionRepository.findById(1L)).thenReturn(Optional.empty());
+        // Выполняем вызов метода
+        auctionService.placeBidToAuction(pretender, price, auctionId);
 
-        // Execute the method
-        HttpStatusCode result = auctionService.placeBidToAuction(pretender, 150.0f, 1L);
-
-        // Assert or verify your expectations
-        assertEquals(HttpStatus.BAD_REQUEST, result);
+        // Проверяем, что обновление заявки на аукцион вызвано
+        verify(auctionRepository).updateWithBid(pretender, auctionId, price);
     }
 
     @Test
-    public void testPlaceBidToAuctionInvalidPrice() {
-        // Create test data
-        User pretender = new User();
-        Auction auction = new Auction();
-        auction.setLastPrice(200.0f); // Higher than the bid price
-        auction.setClosed(false);
+    void testCurrentAuctions() {
+        AuctionFilter filter = mock(AuctionFilter.class);
+        when(filter.matches(any(Auction.class))).thenReturn(true);
 
-        // Mock repository methods
-        when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
+        List<Auction> auctions = List.of(auction);
 
-        // Execute the method
-        HttpStatusCode result = auctionService.placeBidToAuction(pretender, 150.0f, 1L);
+        when(auctionRepository.findAllByClosedIsFalse()).thenReturn(auctions);
 
-        // Assert or verify your expectations
-        assertEquals(HttpStatus.PRECONDITION_FAILED, result);
+        // Выполняем вызов метода
+        List<Auction> result = auctionService.currentAuctions(filter);
+
+        // Проверяем, что результат содержит все аукционы, соответствующие фильтру
+        assertEquals(auctions, result);
+        verify(filter).matches(auction);
     }
 }
+

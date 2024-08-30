@@ -8,10 +8,12 @@ import com.example.demo.products.Product;
 import com.example.demo.services.OrderService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,15 +28,10 @@ public class OrderController {
     private final OrderService orderService;
     private final DtoMapper mapper;
     //Подтверждаем доставку
-
-    //TODO: проверять что пользователь владелец вещи, сделать аналог OLX доставки, так, чтобы заказ закрывался когда покупатель забирает заказ, а перед этим
-    //TODO: он переводил деньги через систему на карту продавца которую он не видит, а там они блокировались
-    //TODO: закрывать ордер по нажатию конпки отмена покупателя ИЛИ продавца, по успешному завершению ордера отправлять на электронную почту просьбу оставить отзыв, или
-    //TODO: прямо сразу же в приложении
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PatchMapping("/delivered/{id}")
-    public void closeOrder(@PathVariable Long id){
-        orderService.closeOrder(id);
+    public void closeOrder(@AuthenticationPrincipal User user, @PathVariable Long id){
+        orderService.closeOrder(id,user);
     }
 
     //Заказы данного пользователя
@@ -51,10 +48,10 @@ public class OrderController {
     }
 
     @ResponseStatus(HttpStatus.FOUND)
+    @PreAuthorize("hasAuthority(ROLE_ADMIN)")
     @GetMapping("/admin")
-    //TODO: Return Specifical DTOs for admins
-    public List<ProductOrderDTO> ordersAdmin(@RequestBody PageRequest pageRequest){
-        return mapCollectionToDto(orderService.pageOrders(pageRequest));
+    public Page<ProductOrder> ordersAdmin(@RequestBody PageRequest pageRequest){
+        return orderService.pageOrders(pageRequest);
     }
 
     //Посмотреть проданные товары выбранного пользователя, если он разрешил такой просмотр
@@ -66,10 +63,20 @@ public class OrderController {
         return new ResponseEntity<>(dtos,HttpStatus.FOUND);
     }
 
-    //TODO: Спрашивать согласия у продавца на открытие ордера
     @PostMapping("/{sellerId}")
     public HttpStatusCode makeOrder(@AuthenticationPrincipal User buyer, @PathVariable Long sellerId, @RequestBody List<Product> products ) throws MessagingException {
         return orderService.makeOrder(buyer,products, sellerId);
+    }
+
+    @PatchMapping("/{orderId}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void confirmOrder(@AuthenticationPrincipal User seller, @PathVariable Long orderId){
+        orderService.confirmOrder(seller,orderId);
+    }
+
+    @DeleteMapping("/{orderId}")
+    public void cancelOrder(@AuthenticationPrincipal User buyerOrSeller, @PathVariable Long orderId){
+        orderService.cancelOrder(buyerOrSeller,orderId);
     }
 
     List<ProductOrderDTO> mapCollectionToDto(Collection<ProductOrder> orders){

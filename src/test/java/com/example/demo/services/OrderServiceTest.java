@@ -4,29 +4,27 @@ import com.example.demo.entities.ProductOrder;
 import com.example.demo.entities.User;
 import com.example.demo.products.Product;
 import com.example.demo.repositories.OrderRepository;
+import com.example.demo.repositories.UserRepository;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
 public class OrderServiceTest {
 
     @InjectMocks
@@ -36,131 +34,170 @@ public class OrderServiceTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private UserService userService; // Assuming a UserService for getUser
+    private NotificationService notificationService;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserService userService;
+
+    private User buyer;
+    private User seller;
+    private Product product;
+    private ProductOrder order;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-    @Test
-    public void testPageOrders() {
-        // Arrange
-        Pageable pageRequest = PageRequest.of(0, 10);
-        List<ProductOrder> orders = new ArrayList<>(); // Create a list of orders
+        buyer = new User();
+        seller = new User();
 
-        // Mock the repository's findAll method
-        Mockito.when(orderRepository.findAll(pageRequest)).thenReturn((Page<ProductOrder>) orders);
+        product = new Product();
+        product.setPrice(100.0f);
+        product.setForSale(true);
 
-        // Act
-        Collection<ProductOrder> result = orderService.pageOrders(pageRequest);
+        buyer.setProducts(new ArrayList<>());
+        buyer.getProducts().add(product);
 
-        // Assert
-        assertSame(orders, result);
-    }
+        seller.setProducts(new ArrayList<>());
+        seller.getProducts().add(product);
 
-    @Test
-    public void testCloseOrder() {
-        // Arrange
-        Long orderId = 1L;
-        ProductOrder order = new ProductOrder();
-        order.setId(orderId);
+        order = new ProductOrder();
+        order.setBuyer(buyer);
+        order.setSeller(seller);
+        order.setProducts(List.of(product));
+        order.setPrice(100.0f);
         order.setDelivered(false);
-
-        // Mock the repository methods
-        Mockito.when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        Mockito.when(orderRepository.save(order)).thenReturn(order);
-
-        // Act
-        orderService.closeOrder(orderId);
-
-        // Assert
-        assertTrue(order.isDelivered());
-        // Verify that save method was called
-        Mockito.verify(orderRepository, times(1)).save(order);
+        order.setConfirmed(false);
     }
 
     @Test
-    public void testSelectedUserOrdersHistory() {
-        // Arrange
-        Long userId = 1L;
-        User selectedUser = new User();
-        selectedUser.setId(userId);
-        selectedUser.setOrderHistoryHidden(false);
-        List<ProductOrder> userOrders = new ArrayList<>(); // Create a list of orders
-        userOrders.add(new ProductOrder());
-        userOrders.add(new ProductOrder());
-        selectedUser.setSellingOrders(userOrders);
+    void testPageOrders() {
+        Pageable pageable = Pageable.unpaged();
+        Page<ProductOrder> ordersPage = new PageImpl<>(List.of(order));
+        when(orderRepository.findAll(pageable)).thenReturn(ordersPage);
 
-        // Mock the UserService method
-        Mockito.when(userService.getUser(userId)).thenReturn(selectedUser);
+        Page<ProductOrder> result = orderService.pageOrders(pageable);
 
-        // Act
-        Optional<List<ProductOrder>> result = orderService.selectedUserOrdersHistory(userId);
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(orderRepository).findAll(pageable);
+    }
 
-        // Assert
+    @Test
+    void testCloseOrder() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        orderService.closeOrder(1L, buyer);
+
+        assertTrue(order.getDelivered());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    void testCloseOrderUnauthorizedUser() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        orderService.closeOrder(1L, new User());
+
+        assertFalse(order.getDelivered());
+        verify(orderRepository, never()).save(any(ProductOrder.class));
+    }
+
+    @Test
+    void testSelectedUserOrdersHistory() {
+        buyer.setOrderHistoryHidden(false);
+        buyer.setSellingOrders(List.of(order));
+        when(userService.getUser(anyLong())).thenReturn(buyer);
+
+        Optional<List<ProductOrder>> result = orderService.selectedUserOrdersHistory(1L);
+
         assertTrue(result.isPresent());
-        assertEquals(2, result.get().size());
+        assertEquals(1, result.get().size());
+        verify(userService).getUser(anyLong());
     }
 
     @Test
-    public void testMakeOrder() throws MessagingException {
-        // Arrange
-        User buyer = new User();
-        List<Product> products = new ArrayList<>(); // Create a list of products
-        Long sellerId = 2L;
-        User seller = new User();
-        seller.setId(sellerId);
-        seller.setProducts(new ArrayList<>()); // Create a list of seller's products
+    void testSelectedUserOrdersHistoryHidden() {
+        buyer.setOrderHistoryHidden(true);
+        when(userService.getUser(anyLong())).thenReturn(buyer);
 
-        // Mock the UserService method
-        Mockito.when(userService.getUser(sellerId)).thenReturn(seller);
+        Optional<List<ProductOrder>> result = orderService.selectedUserOrdersHistory(1L);
 
-        // Mock the repository's save methods
-        Mockito.when(orderRepository.save(Mockito.any(ProductOrder.class))).thenReturn(new ProductOrder());
+        assertTrue(result.isEmpty());
+        verify(userService).getUser(anyLong());
+    }
 
-        // Act
-        HttpStatusCode result = orderService.makeOrder(buyer, products, sellerId);
+    @Test
+    void testMakeOrder() throws MessagingException {
+        when(userService.getUser(anyLong())).thenReturn(seller);
 
-        // Assert
+        HttpStatusCode result = orderService.makeOrder(buyer, List.of(product), seller.getId());
+
         assertEquals(HttpStatus.CREATED, result);
-        // Verify that save method for seller's products and orderRepository.save were called
-        Mockito.verify(userService, times(1)).save(seller);
-        Mockito.verify(orderRepository, times(1)).save(Mockito.any(ProductOrder.class));
+        verify(notificationService).notifyPendingOrder(seller);
+        verify(orderRepository).save(any(ProductOrder.class));
     }
 
     @Test
-    public void testCreateOrder() {
-        // Arrange
-        User seller = new User();
-        seller.setProducts(new ArrayList<>()); // Create a list of seller's products
-        Product product1 = new Product();
-        product1.setPrice(50.0f);
-        Product product2 = new Product();
-        product2.setPrice(30.0f);
-        List<Product> products = new ArrayList<>();
-        products.add(product1);
-        products.add(product2);
-        User buyer = new User();
+    void testMakeOrderBadRequest() throws MessagingException {
+        when(userService.getUser(anyLong())).thenReturn(seller);
 
-        // Mock the UserService method
-        Mockito.when(userService.getUser(seller.getId())).thenReturn(seller);
+        HttpStatusCode result = orderService.makeOrder(buyer, List.of(product), seller.getId() + 1);
 
-        // Mock the repository methods
-        Mockito.when(orderRepository.save(Mockito.any(ProductOrder.class)).thenAnswer(invocation -> {
-            ProductOrder savedOrder = invocation.getArgument(0);
-            savedOrder.setId(1L); // Set an ID for the saved order
-            return savedOrder;
-        });
+        assertEquals(HttpStatus.BAD_REQUEST, result);
+        verify(notificationService, never()).notifyPendingOrder(any(User.class));
+        verify(orderRepository, never()).save(any(ProductOrder.class));
+    }
 
-        // Act
-        orderService.createOrder(buyer, products, seller, seller.getProducts());
+    @Test
+    void testConfirmOrder() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
 
-        // Assert
-        assertEquals(0, seller.getProducts().size()); // Check that seller's products are removed
-        // Verify that user service's save method and orderRepository.save were called
-        Mockito.verify(userService, times(1)).save(seller);
-        Mockito.verify(orderRepository, times(1)).save(Mockito.any(ProductOrder.class));
+        orderService.confirmOrder(seller, 1L);
+
+        assertTrue(order.getConfirmed());
+        verify(userRepository).save(seller);
+    }
+
+    @Test
+    void testConfirmOrderNotFound() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> orderService.confirmOrder(seller, 1L));
+        assertEquals("Order not found", thrown.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void testCancelOrder() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        orderService.cancelOrder(buyer, 1L);
+
+        assertTrue(order.getSeller().getProducts().contains(product));
+        verify(orderRepository).delete(order);
+    }
+
+    @Test
+    void testCancelOrderNotFound() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> orderService.cancelOrder(buyer, 1L));
+        assertEquals("Order not found", thrown.getMessage());
+        verify(orderRepository, never()).delete(any(ProductOrder.class));
+    }
+
+    @Test
+    void testCancelOrderNotAuthorized() {
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        orderService.cancelOrder(new User(), 1L);
+
+        assertFalse(order.getSeller().getProducts().contains(product));
+        verify(orderRepository).delete(order);
     }
 }
 

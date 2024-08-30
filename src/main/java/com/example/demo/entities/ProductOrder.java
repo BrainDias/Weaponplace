@@ -6,10 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.List;
 
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 @Data
 @NoArgsConstructor
@@ -29,7 +31,9 @@ public class ProductOrder {
     private List<Product> products;
 
     Float price;
+
     Boolean delivered;
+    Boolean confirmed;
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)

@@ -1,22 +1,21 @@
-package org.weaponplace.services;
+package org.weaponplace.services.implementations;
 
 import org.weaponplace.entities.User;
 import org.weaponplace.products.Product;
-import org.weaponplace.repositories.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.weaponplace.services.interfaces.NotificationService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class NotificationService {
+public class EmailNotificationServiceImpl implements NotificationService {
 
-    private final EmailService emailService;
-    private final UserRepository userRepository;
+    private final EmailServiceImpl emailService;
 
     @Value("${auction.owner.subject}")
     String ownerSubject;

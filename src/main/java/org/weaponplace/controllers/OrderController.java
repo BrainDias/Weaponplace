@@ -5,7 +5,7 @@ import org.weaponplace.entities.ProductOrder;
 import org.weaponplace.entities.User;
 import org.weaponplace.mappers.DtoMapper;
 import org.weaponplace.products.Product;
-import org.weaponplace.services.OrderService;
+import org.weaponplace.services.implementations.OrderServiceImpl;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,7 +25,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/orders")
 public class OrderController {
-    private final OrderService orderService;
+    private final OrderServiceImpl orderService;
     private final DtoMapper mapper;
     //Подтверждаем доставку
     @ResponseStatus(HttpStatus.ACCEPTED)

@@ -1,4 +1,4 @@
-package org.weaponplace.services;
+package org.weaponplace.services.implementations;
 
 import org.weaponplace.entities.Auction;
 import org.weaponplace.entities.User;
@@ -12,16 +12,17 @@ import org.springframework.data.util.Streamable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.weaponplace.services.interfaces.AuctionService;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
-public class AuctionService {
+public class AuctionServiceImpl implements AuctionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
-    private final NotificationService notificationService;
+    private final EmailNotificationServiceImpl notificationService;
 
     @Transactional
     public void createAuction(User owner, Auction auction) {

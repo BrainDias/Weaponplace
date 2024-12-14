@@ -5,7 +5,7 @@ import org.weaponplace.entities.ProductOrder;
 import org.weaponplace.entities.User;
 import org.weaponplace.mappers.DtoMapper;
 import org.weaponplace.products.Product;
-import org.weaponplace.services.OrderService;
+import org.weaponplace.services.implementations.OrderServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ class OrderControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private OrderService orderService;
+    private OrderServiceImpl orderService;
 
     @MockBean
     private DtoMapper mapper;

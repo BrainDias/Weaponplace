@@ -1,4 +1,4 @@
-package org.weaponplace.services;
+package org.weaponplace.services.implementations;
 
 import org.weaponplace.entities.ProductOrder;
 import org.weaponplace.entities.User;
@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.weaponplace.services.interfaces.OrderService;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,12 +21,12 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
-public class OrderService {
+public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final NotificationService notificationService;
+    private final EmailNotificationServiceImpl notificationService;
     private final UserRepository userRepository;
-    private final UserService userService;
+    private final UserServiceImpl userService;
     public Page<ProductOrder> pageOrders(Pageable pageRequest){
         return orderRepository.findAll(pageRequest);
     }

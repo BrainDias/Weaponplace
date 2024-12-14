@@ -9,13 +9,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.weaponplace.services.implementations.EmailServiceImpl;
 
 import static org.mockito.Mockito.*;
 
 public class EmailServiceTest {
 
     @InjectMocks
-    private EmailService emailService;
+    private EmailServiceImpl emailService;
 
     @Mock
     private JavaMailSender emailSender;

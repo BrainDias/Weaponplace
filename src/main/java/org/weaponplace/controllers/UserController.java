@@ -3,7 +3,7 @@ package org.weaponplace.controllers;
 import org.weaponplace.dtos.ProfileDTO;
 import org.weaponplace.entities.User;
 import org.weaponplace.mappers.DtoMapper;
-import org.weaponplace.services.UserService;
+import org.weaponplace.services.implementations.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
-	private final UserService userService;
+	private final UserServiceImpl userService;
 	private final DtoMapper mapper;
 
 	//Личный кабинет

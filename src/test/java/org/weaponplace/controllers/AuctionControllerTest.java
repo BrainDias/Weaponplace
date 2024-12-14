@@ -10,7 +10,7 @@ import org.weaponplace.entities.Auction;
 import org.weaponplace.entities.User;
 import org.weaponplace.filters.AuctionFilter;
 import org.weaponplace.mappers.DtoMapper;
-import org.weaponplace.services.AuctionService;
+import org.weaponplace.services.implementations.AuctionServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ public class AuctionControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    private AuctionService auctionService;
+    private AuctionServiceImpl auctionService;
 
     @Mock
     private DtoMapper mapper;

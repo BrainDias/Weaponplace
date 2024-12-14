@@ -16,6 +16,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.weaponplace.services.implementations.EmailNotificationServiceImpl;
+import org.weaponplace.services.implementations.OrderServiceImpl;
+import org.weaponplace.services.implementations.UserServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,19 +31,19 @@ import static org.mockito.Mockito.*;
 public class OrderServiceTest {
 
     @InjectMocks
-    private OrderService orderService;
+    private OrderServiceImpl orderService;
 
     @Mock
     private OrderRepository orderRepository;
 
     @Mock
-    private NotificationService notificationService;
+    private EmailNotificationServiceImpl notificationService;
 
     @Mock
     private UserRepository userRepository;
 
     @Mock
-    private UserService userService;
+    private UserServiceImpl userService;
 
     private User buyer;
     private User seller;

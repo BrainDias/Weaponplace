@@ -1,4 +1,4 @@
-package org.weaponplace.services;
+package org.weaponplace.services.implementations;
 
 import org.weaponplace.entities.User;
 import org.weaponplace.enums.SortingType;
@@ -11,16 +11,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.weaponplace.services.interfaces.ProductService;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
-public class ProductService {
-    private final UserService userService;
+public class ProductServiceImpl implements ProductService {
+    private final UserServiceImpl userService;
     private final UserRepository userRepository;
-    private final NotificationService notificationService;
+    private final EmailNotificationServiceImpl notificationService;
 
     public void addProduct(User user, Product product) {
         user.getProducts().add(product);

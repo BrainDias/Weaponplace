@@ -3,7 +3,7 @@ package org.weaponplace.controllers;
 import org.weaponplace.dtos.ProfileDTO;
 import org.weaponplace.entities.User;
 import org.weaponplace.mappers.DtoMapper;
-import org.weaponplace.services.UserService;
+import org.weaponplace.services.implementations.UserServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @MockBean
     private DtoMapper mapper;

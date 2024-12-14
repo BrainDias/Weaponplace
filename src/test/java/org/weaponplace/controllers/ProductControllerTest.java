@@ -7,7 +7,7 @@ import org.weaponplace.enums.SortingType;
 import org.weaponplace.mappers.DtoMapper;
 import org.weaponplace.products.Product;
 import org.weaponplace.products.ProductType;
-import org.weaponplace.services.ProductService;
+import org.weaponplace.services.implementations.ProductServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ class ProductControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ProductService productService;
+    private ProductServiceImpl productService;
 
     @MockBean
     private DtoMapper mapper;

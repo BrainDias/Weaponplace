@@ -12,6 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.weaponplace.services.implementations.EmailNotificationServiceImpl;
+import org.weaponplace.services.implementations.ProductServiceImpl;
+import org.weaponplace.services.implementations.UserServiceImpl;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -27,16 +30,16 @@ import static org.mockito.Mockito.when;
 public class ProductServiceTest {
 
     @InjectMocks
-    private ProductService productService;
+    private ProductServiceImpl productService;
 
     @Mock
-    private NotificationService notificationService;
+    private EmailNotificationServiceImpl notificationService;
 
     @Mock
     private UserRepository userRepository;
 
     @Mock
-    private UserService userService;
+    private UserServiceImpl userService;
 
     private Product product;
     private ProductType productType;

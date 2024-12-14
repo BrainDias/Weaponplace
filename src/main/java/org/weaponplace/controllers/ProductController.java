@@ -7,7 +7,7 @@ import org.weaponplace.enums.SortingType;
 import org.weaponplace.mappers.DtoMapper;
 import org.weaponplace.products.Product;
 import org.weaponplace.products.ProductType;
-import org.weaponplace.services.ProductService;
+import org.weaponplace.services.implementations.ProductServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/products")
 public class ProductController {
-    private final ProductService productService;
+    private final ProductServiceImpl productService;
     private final DtoMapper mapper;
 
     @GetMapping("/query")

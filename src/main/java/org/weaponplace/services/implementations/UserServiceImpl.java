@@ -1,8 +1,7 @@
-package org.weaponplace.services;
+package org.weaponplace.services.implementations;
 
 import org.weaponplace.entities.User;
 import org.weaponplace.repositories.UserRepository;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -13,7 +12,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl {
 
     private final UserRepository userRepository;
 

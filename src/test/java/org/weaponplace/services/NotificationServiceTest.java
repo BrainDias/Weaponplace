@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.weaponplace.services.implementations.EmailNotificationServiceImpl;
+import org.weaponplace.services.implementations.EmailServiceImpl;
 
 
 import java.util.List;
@@ -19,10 +21,10 @@ import static org.mockito.Mockito.*;
 public class NotificationServiceTest {
 
     @InjectMocks
-    private NotificationService notificationService;
+    private EmailNotificationServiceImpl notificationService;
 
     @Mock
-    private EmailService emailService;
+    private EmailServiceImpl emailService;
 
     @Mock
     private UserRepository userRepository;

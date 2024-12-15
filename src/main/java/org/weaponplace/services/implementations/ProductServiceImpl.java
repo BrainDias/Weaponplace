@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class ProductServiceImpl implements ProductService {
     private final UserServiceImpl userService;
     private final UserRepository userRepository;
-    private final EmailNotificationServiceImpl notificationService;
+    private final NotificationServiceImpl notificationService;
 
     public void addProduct(User user, Product product) {
         user.getProducts().add(product);

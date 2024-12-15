@@ -1,6 +1,7 @@
 package org.weaponplace.mappers;
 
 import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 import org.weaponplace.dtos.AuctionDTO;
 import org.weaponplace.dtos.ProductDTO;
 import org.weaponplace.dtos.ProductOrderDTO;
@@ -10,7 +11,7 @@ import org.weaponplace.entities.ProductOrder;
 import org.weaponplace.entities.User;
 import org.weaponplace.products.Product;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface DtoMapper {
     ProfileDTO userToDto(User user);
     ProductOrderDTO orderToDto(ProductOrder order);

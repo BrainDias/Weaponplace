@@ -35,6 +35,7 @@ public class Product {
     SightType type;
 
     //Weapons and ammo only
+    @Enumerated(EnumType.STRING)
     Caliber caliber;
 
     //Weapons only

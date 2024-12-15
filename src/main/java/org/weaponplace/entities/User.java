@@ -19,6 +19,7 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @Entity
+@Table(name = "users")
 @NoArgsConstructor
 public class User implements UserDetails {
     @Id

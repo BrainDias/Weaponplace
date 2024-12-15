@@ -13,7 +13,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EmailNotificationServiceImpl implements NotificationService {
+public class NotificationServiceImpl implements NotificationService {
 
     private final EmailServiceImpl emailService;
 

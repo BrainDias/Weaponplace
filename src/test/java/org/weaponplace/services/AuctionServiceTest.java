@@ -15,7 +15,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.util.Streamable;
 import org.springframework.transaction.annotation.Transactional;
 import org.weaponplace.services.implementations.AuctionServiceImpl;
-import org.weaponplace.services.implementations.EmailNotificationServiceImpl;
+import org.weaponplace.services.implementations.NotificationServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class AuctionServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private EmailNotificationServiceImpl notificationService;
+    private NotificationServiceImpl notificationService;
 
     private User owner;
     private User pretender;

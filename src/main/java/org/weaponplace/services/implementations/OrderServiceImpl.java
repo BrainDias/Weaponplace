@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final EmailNotificationServiceImpl notificationService;
+    private final NotificationServiceImpl notificationService;
     private final UserRepository userRepository;
     private final UserServiceImpl userService;
     public Page<ProductOrder> pageOrders(Pageable pageRequest){

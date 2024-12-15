@@ -13,3 +13,24 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: 4791355pDa
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+auction:
+  pretender:
+    subject: "Вы выиграли аукцион"
+    text: "Теперь выигранная экипировка будет отправлена к вам. Свяжитесь с организатором аукциона в случае возникновения
+    вопросов"
+  owner:
+    subject: "Аукцион завершен"
+    text: "Теперь вы должны отправить победителю обозначенные в аукционе вещи. Свяжитесь с ним в ближайшее время"
+wishlist:
+  added:
+    notification:
+      subject: "Вещи из вашего списка желаемого появились в продаже"
+      before: "Речь идет о следующей экипировке, подходящей под ваши фильтры:"
+      after: "Не упустите возможность связаться с продавцами"
+order:
+  seller:
+    subject: ""
+    text: ""

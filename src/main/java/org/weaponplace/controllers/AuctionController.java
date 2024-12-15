@@ -4,11 +4,11 @@ import org.weaponplace.dtos.AuctionDTO;
 import org.weaponplace.entities.User;
 import org.weaponplace.filters.AuctionFilter;
 import org.weaponplace.mappers.DtoMapper;
-import org.weaponplace.services.implementations.AuctionServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.weaponplace.services.interfaces.AuctionService;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/auction")
 public class AuctionController {
 
-    private final AuctionServiceImpl auctionService;
+    private final AuctionService auctionService;
     private final DtoMapper mapper;
 
     @PostMapping("/")

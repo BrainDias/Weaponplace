@@ -2,6 +2,7 @@ package org.weaponplace.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,15 +36,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(inMemoryUserDetailsService()).passwordEncoder(passwordEncoder());
+    public AuthenticationManager authManager(HttpSecurity http, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) throws Exception {
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder)
+                .and()
+                .build();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
         return httpSecurity
                 .authorizeHttpRequests()
-                .requestMatchers("/control","/profile","/orders/**").hasRole("ROLE_USER")
+                .requestMatchers("/control","/profile","/orders/**").hasRole("USER")
                 .and()
                 .formLogin()
                 .loginProcessingUrl("/auth")

@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.weaponplace.services.interfaces.AuctionService;
+import org.weaponplace.services.interfaces.NotificationService;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class AuctionServiceImpl implements AuctionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
-    private final EmailNotificationServiceImpl notificationService;
+    private final NotificationService notificationService;
 
     @Transactional
     public void createAuction(User owner, Auction auction) {

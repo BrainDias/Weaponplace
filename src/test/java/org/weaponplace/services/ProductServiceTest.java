@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.weaponplace.services.implementations.EmailNotificationServiceImpl;
+import org.weaponplace.services.implementations.NotificationServiceImpl;
 import org.weaponplace.services.implementations.ProductServiceImpl;
 import org.weaponplace.services.implementations.UserServiceImpl;
 
@@ -33,7 +33,7 @@ public class ProductServiceTest {
     private ProductServiceImpl productService;
 
     @Mock
-    private EmailNotificationServiceImpl notificationService;
+    private NotificationServiceImpl notificationService;
 
     @Mock
     private UserRepository userRepository;

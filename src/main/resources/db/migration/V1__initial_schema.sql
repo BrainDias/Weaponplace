@@ -6,8 +6,27 @@ CREATE TYPE product_type AS ENUM ('WEAPON', 'ACCESSORY', 'AMMO', 'OILS_AND_LUBRI
 CREATE TYPE sight_type AS ENUM ('Regular', 'Night', 'Thermal', 'Iron', 'RedDot');
 CREATE TYPE weapon_type AS ENUM ('SNIPER_RIFLE', 'MACHINEGUN', 'PISTOL', 'ASSAULT_RIFLE');
 
+-- Таблица пользователей (User)
+CREATE TABLE users (
+                       id BIGSERIAL PRIMARY KEY,  -- Идентификатор пользователя
+                       username VARCHAR(255) UNIQUE NOT NULL,  -- Имя пользователя
+                       password VARCHAR(255) NOT NULL,  -- Пароль
+                       rating FLOAT,  -- Рейтинг пользователя
+                       ratings_number INTEGER,  -- Количество оценок
+                       email VARCHAR(255),  -- Электронная почта
+                       phone_number VARCHAR(50),  -- Номер телефона
+                       active BOOLEAN,  -- Активен ли пользователь
+                       order_history_hidden BOOLEAN,  -- Скрыта ли история заказов
+                       avatar BYTEA,  -- Аватар пользователя
+                       created_at TIMESTAMP,  -- Дата создания
+                       updated_at TIMESTAMP,  -- Дата обновления
+                       CONSTRAINT unique_email UNIQUE (email),  -- Уникальность email
+                       CONSTRAINT unique_phone_number UNIQUE (phone_number)  -- Уникальность номера телефона
+);
+
 -- Create the product table
 CREATE TABLE products (
+                         id BIGSERIAL PRIMARY KEY,
                          user_id BIGINT NOT NULL,  -- Внешний ключ на таблицу users
                          price NUMERIC,
                          name VARCHAR(255),
@@ -30,7 +49,6 @@ CREATE TABLE products (
                          ammo_type VARCHAR(255),
                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                         PRIMARY KEY (user_id, name),  -- Предполагаем, что имя продукта уникально для пользователя
                          CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -66,8 +84,8 @@ CREATE TABLE product_order_products (
                                         product_order_id BIGINT NOT NULL,  -- Внешний ключ на таблицу product_orders
                                         product_id BIGINT NOT NULL,  -- Внешний ключ на таблицу products
                                         PRIMARY KEY (product_order_id, product_id),
-                                        CONSTRAINT fk_product_order_product_order FOREIGN KEY (product_order_id) REFERENCES product_orders(id) ON DELETE CASCADE,
-                                        CONSTRAINT fk_product_order_product FOREIGN KEY (product_id) REFERENCES products(user_id,name) ON DELETE CASCADE
+                                        CONSTRAINT fk_product_order FOREIGN KEY (product_order_id) REFERENCES product_orders(id) ON DELETE CASCADE,
+                                        CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 -- Создание таблицы для аукционов (Auction)
@@ -94,34 +112,16 @@ CREATE TABLE auction_products (
                                   product_id BIGINT NOT NULL,  -- Внешний ключ на таблицу products
                                   PRIMARY KEY (auction_id, product_id),
                                   CONSTRAINT fk_auction_product FOREIGN KEY (auction_id) REFERENCES auctions(id) ON DELETE CASCADE,
-                                  CONSTRAINT fk_product_auction FOREIGN KEY (product_id) REFERENCES products(user_id,name) ON DELETE CASCADE
+                                  CONSTRAINT fk_product_auction FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 -- Таблица для связи пользователей и фильтров продуктов (UserProductFilters)
 CREATE TABLE user_product_filters (
                                       user_id BIGINT NOT NULL,  -- Внешний ключ на таблицу users
-                                      filter_id BIGINT NOT NULL,  -- Внешний ключ на таблицу product_filters
-                                      PRIMARY KEY (user_id, filter_id),
+                                      name VARCHAR(255) NOT NULL,  -- Часть Внешнего ключа на таблицу product_filters
+                                      PRIMARY KEY (user_id, name),
                                       CONSTRAINT fk_user_filter FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                                      CONSTRAINT fk_filter FOREIGN KEY (filter_id) REFERENCES product_filters(user_id,name) ON DELETE CASCADE
-);
-
--- Таблица пользователей (User)
-CREATE TABLE users (
-                       id BIGSERIAL PRIMARY KEY,  -- Идентификатор пользователя
-                       username VARCHAR(255) UNIQUE NOT NULL,  -- Имя пользователя
-                       password VARCHAR(255) NOT NULL,  -- Пароль
-                       rating FLOAT,  -- Рейтинг пользователя
-                       ratings_number INTEGER,  -- Количество оценок
-                       email VARCHAR(255),  -- Электронная почта
-                       phone_number VARCHAR(50),  -- Номер телефона
-                       active BOOLEAN,  -- Активен ли пользователь
-                       order_history_hidden BOOLEAN,  -- Скрыта ли история заказов
-                       avatar BYTEA,  -- Аватар пользователя
-                       created_at TIMESTAMP,  -- Дата создания
-                       updated_at TIMESTAMP,  -- Дата обновления
-                       CONSTRAINT unique_email UNIQUE (email),  -- Уникальность email
-                       CONSTRAINT unique_phone_number UNIQUE (phone_number)  -- Уникальность номера телефона
+                                      CONSTRAINT fk_filter FOREIGN KEY (user_id,name) REFERENCES product_filters(user_id,name) ON DELETE CASCADE
 );
 
 -- Таблица для хранения ролей пользователей (Authorities)
@@ -138,7 +138,7 @@ CREATE TABLE user_products (
                                product_id BIGINT NOT NULL,  -- Внешний ключ на таблицу products
                                PRIMARY KEY (user_id, product_id),
                                CONSTRAINT fk_user_product FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                               CONSTRAINT fk_product_user FOREIGN KEY (product_id) REFERENCES products(user_id,name) ON DELETE CASCADE
+                               CONSTRAINT fk_product_user FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 -- Таблица для хранения товаров в списке желаемого пользователя
@@ -147,7 +147,7 @@ CREATE TABLE user_wishlist (
                                product_id BIGINT NOT NULL,  -- Внешний ключ на таблицу products
                                PRIMARY KEY (user_id, product_id),
                                CONSTRAINT fk_user_wishlist FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                               CONSTRAINT fk_product_wishlist FOREIGN KEY (product_id) REFERENCES products(user_id,name) ON DELETE CASCADE
+                               CONSTRAINT fk_product_wishlist FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 -- Таблица для хранения продуктов, о которых было уведомлено
@@ -156,7 +156,7 @@ CREATE TABLE user_wish_notified_products (
                                              product_id BIGINT NOT NULL,  -- Внешний ключ на таблицу products
                                              PRIMARY KEY (user_id, product_id),
                                              CONSTRAINT fk_user_notified_product FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                                             CONSTRAINT fk_notified_product FOREIGN KEY (product_id) REFERENCES products(user_id,name) ON DELETE CASCADE
+                                             CONSTRAINT fk_notified_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 --
@@ -165,69 +165,66 @@ VALUES
     (1, 'user1', 'password1', 4.5, 10, 'user1@example.com', '+123456789', true, false, now(), now(), NULL),
     (2, 'user2', 'password2', 3.0, 20, 'user2@example.com', '+987654321', true, true, now(), now(), NULL),
     (3, 'admin', 'adminpassword', 5.0, 50, 'admin@example.com', '+1122334455', true, false, now(), now(), NULL);
-INSERT INTO products (price, name, qty, accessory_type, for_sale, hidden, product_type, magnification, caliber, weight, length, rate_of_fire, weapon_type, barrel_length, feeding_type, ammo_type, created_at, updated_at,user_id)
+INSERT INTO products (id,price, name, qty, accessory_type, for_sale, hidden, product_type, magnification, caliber, weight, length, rate_of_fire, weapon_type, barrel_length, feeding_type, ammo_type, created_at, updated_at,user_id)
 VALUES
-    (1000.00, 'Sniper Rifle X', 5, NULL, true, false, 'WEAPON', 4.0, 'RIFLE_NATO', 10.5, 120, 10, 'SNIPER_RIFLE', 30, 'DRUM', NULL, now(), now(),1),
-    (150.00, '9mm Ammo', 1000, NULL, true, false, 'AMMO', NULL, 'PISTOL_NATO', NULL, NULL, NULL, NULL, NULL, NULL, '9x19', now(), now(),2),
-    (250.00, 'Red Dot Sight', 50, 'SIGHT', true, false, 'ACCESSORY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, now(), now(),3),
-    (2000.00, 'Assault Rifle Y', 10, NULL, true, false, 'WEAPON', NULL, 'AR_NATO', 7.5, 90, 600, 'ASSAULT_RIFLE', NULL, 'BOXED', NULL, now(), now(), 1),
-    (100.00, '5.56mm Ammo', 2000, NULL, true, false, 'AMMO', NULL, 'AR_NATO', NULL, NULL, NULL, NULL, NULL, NULL, '5.56x45', now(), now(), 2),
-    (180.00, 'Thermal Scope', 20, 'SIGHT', true, false, 'ACCESSORY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, now(), now(), 3),
-    (500.00, 'Machine Gun Z', 3, NULL, true, false, 'WEAPON', NULL, 'HEAVY_NATO', 15.0, 130, 1000, 'MACHINEGUN', 50, 'DRUM', NULL, now(), now(), 4),
-    (75.00, 'Muzzle Device', 30, 'MUZZLE_DEVICE', true, false, 'ACCESSORY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, now(), now(), 5),
-    (250.00, 'Night Vision Scope', 5, 'SIGHT', true, false, 'ACCESSORY', 6.0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, now(), now(), 6);
+    (1,1000.00, 'Sniper Rifle X', 5, NULL, true, false, 'WEAPON', 4.0, '7.62x51', 10.5, 120, 10, 'SNIPER_RIFLE', 30, 'DRUM', NULL, now(), now(),1),
+    (2,150.00, '9mm Ammo', 1000, NULL, true, false, 'AMMO', NULL, '9x19', NULL, NULL, NULL, NULL, NULL, NULL, '9x19', now(), now(),2),
+    (3,250.00, 'Red Dot Sight', 50, 'SIGHT', true, false, 'ACCESSORY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, now(), now(),3),
+    (4,2000.00, 'Assault Rifle Y', 10, NULL, true, false, 'WEAPON', NULL, '5.56x45', 7.5, 90, 600, 'ASSAULT_RIFLE', NULL, 'BOXED', NULL, now(), now(), 1),
+    (5,100.00, '5.56mm Ammo', 2000, NULL, true, false, 'AMMO', NULL, '5.56x45', NULL, NULL, NULL, NULL, NULL, NULL, '5.56x45', now(), now(), 2),
+    (6,180.00, 'Thermal Scope', 20, 'SIGHT', true, false, 'ACCESSORY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, now(), now(), 3),
+    (7,500.00, 'Machine Gun Z', 3, NULL, true, false, 'WEAPON', NULL, '.50', 15.0, 130, 1000, 'MACHINEGUN', 50, 'DRUM', NULL, now(), now(), 1),
+    (8,75.00, 'Muzzle Device', 30, 'MUZZLE_DEVICE', true, false, 'ACCESSORY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, now(), now(), 2),
+    (9,250.00, 'Night Vision Scope', 5, 'SIGHT', true, false, 'ACCESSORY', 6.0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, now(), now(), 3);
 INSERT INTO auctions (id, owner_id, pretender_id, closed, start_price, last_price, price_step, title, description, created_at, updated_at, closing_at)
 VALUES
     (1, 1, 2, false, 500.00, 550.00, 50.00, 'First Auction', 'Auction for Sniper Rifle X', now(), now(), now() + interval '10 days'),
     (2, 3, 1, true, 300.00, 450.00, 25.00, 'Second Auction', 'Auction for Red Dot Sight', now() - interval '15 days', now(), now() + interval '5 days'),
-    (3, 4, 5, false, 1000.00, 1100.00, 100.00, 'Third Auction', 'Auction for Assault Rifle Y', now(), now(), now() + interval '7 days'),
-    (4, 2, 6, true, 700.00, 800.00, 50.00, 'Fourth Auction', 'Auction for Thermal Scope', now() - interval '10 days', now(), now() + interval '3 days');
+    (3, 2, 1, false, 1000.00, 1100.00, 100.00, 'Third Auction', 'Auction for Assault Rifle Y', now(), now(), now() + interval '7 days'),
+    (4, 2, 3, true, 700.00, 800.00, 50.00, 'Fourth Auction', 'Auction for Thermal Scope', now() - interval '10 days', now(), now() + interval '3 days');
 INSERT INTO product_orders (id, buyer_id, seller_id, price, delivered, confirmed, created_at, updated_at)
 VALUES
     (1, 1, 2, 1000.00, true, true, now(), now()),
     (2, 2, 3, 500.00, false, false, now(), now()),
-    (3, 4, 1, 1800.00, false, false, now(), now()),
+    (3, 3, 1, 1800.00, false, false, now(), now()),
     (4, 3, 2, 150.00, true, true, now(), now()),
-    (5, 5, 6, 250.00, false, true, now(), now()),
-    (6, 6, 4, 1200.00, true, false, now(), now());
+    (5, 2, 1, 250.00, false, true, now(), now()),
+    (6, 1, 3, 1200.00, true, false, now(), now());
 INSERT INTO product_filters (user_id, product_type, caliber, accessory_type, max_price, weapon_type, name)
 VALUES
-    (1, 'WEAPON', 'RIFLE_NATO', NULL, 1500.00, 'SNIPER_RIFLE', 'Sniper Rifle'),
-    (2, 'AMMO', 'PISTOL_NATO', NULL, 200.00, NULL, 'Ammo'),
+    (1, 'WEAPON', '7.62x51', NULL, 1500.00, 'SNIPER_RIFLE', 'Sniper Rifle'),
+    (2, 'AMMO', '9x19', NULL, 200.00, NULL, 'Ammo'),
     (3, 'ACCESSORY', NULL, 'SIGHT', 300.00, NULL, 'Red Dot Sight'),
-    (4, 'WEAPON', 'HEAVY_NATO', NULL, 2500.00, 'MACHINEGUN', 'Heavy Machine Gun'),
-    (5, 'ACCESSORY', NULL, 'MUZZLE_DEVICE', 100.00, NULL, 'Muzzle Devices'),
-    (6, 'ACCESSORY', NULL, 'SIGHT', 300.00, NULL, 'Night Vision Scopes');
+    (1, 'WEAPON', '.50', NULL, 2500.00, 'MACHINEGUN', 'Heavy Machine Gun'),
+    (2, 'ACCESSORY', NULL, 'MUZZLE_DEVICE', 100.00, NULL, 'Muzzle Devices'),
+    (3, 'ACCESSORY', NULL, 'SIGHT', 300.00, NULL, 'Night Vision Scopes');
 INSERT INTO user_authorities (user_id, authority)
 VALUES
     (1, 'ROLE_USER'),
     (2, 'ROLE_USER'),
-    (3, 'ROLE_ADMIN'),
-    (4, 'ROLE_USER'),
-    (5, 'ROLE_USER'),
-    (6, 'ROLE_USER');
+    (3, 'ROLE_ADMIN');
 INSERT INTO user_products (user_id, product_id)
 VALUES
     (1, 1),  -- User 1 owns the Sniper Rifle
     (2, 2),  -- User 2 owns the 9mm Ammo
     (3, 3),  -- User 3 owns the Red Dot Sight
-    (4, 4),  -- User 4 owns the Machine Gun Z
-    (5, 5),  -- User 5 owns the Muzzle Device
-    (6, 6);  -- User 6 owns the Night Vision Scope
+    (1, 4),  -- User 1 owns the Machine Gun Z
+    (2, 5),  -- User 2 owns the Muzzle Device
+    (3, 6);  -- User 3 owns the Night Vision Scope
 INSERT INTO user_wishlist (user_id, product_id)
 VALUES
     (1, 2),  -- User 1 wishes to have the 9mm Ammo
     (2, 1),  -- User 2 wishes to have the Sniper Rifle
     (3, 2),  -- User 3 wishes to have the 9mm Ammo
-    (4, 3),  -- User 4 wishes to have the Thermal Scope
-    (5, 4),  -- User 5 wishes to have the Machine Gun Z
-    (6, 1);  -- User 6 wishes to have the Sniper Rifle X
+    (1, 3),  -- User 1 wishes to have the Thermal Scope
+    (2, 4),  -- User 2 wishes to have the Machine Gun Z
+    (3, 1);  -- User 3 wishes to have the Sniper Rifle X
 INSERT INTO user_wish_notified_products (user_id, product_id)
 VALUES
     (1, 3),  -- User 1 was notified about the Red Dot Sight
-    (2, 3),  -- User 2 was notified about the Red Dot Sight
-    (3, 1),  -- User 3 was notified about the Sniper Rifle
-    (4, 1),  -- User 4 was notified about the Sniper Rifle X
-    (5, 3),  -- User 5 was notified about the Thermal Scope
-    (6, 4);  -- User 6 was notified about the Machine Gun Z
+    (2, 6),  -- User 2 was notified about the Red Dot Sight
+    (3, 7),  -- User 3 was notified about the Sniper Rifle
+    (1, 1),  -- User 1 was notified about the Sniper Rifle X
+    (2, 9),  -- User 2 was notified about the Thermal Scope
+    (3, 4);  -- User 3 was notified about the Machine Gun Z
 

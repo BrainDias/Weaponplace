@@ -16,7 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.weaponplace.services.implementations.EmailNotificationServiceImpl;
+import org.weaponplace.services.implementations.NotificationServiceImpl;
 import org.weaponplace.services.implementations.OrderServiceImpl;
 import org.weaponplace.services.implementations.UserServiceImpl;
 
@@ -37,7 +37,7 @@ public class OrderServiceTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private EmailNotificationServiceImpl notificationService;
+    private NotificationServiceImpl notificationService;
 
     @Mock
     private UserRepository userRepository;

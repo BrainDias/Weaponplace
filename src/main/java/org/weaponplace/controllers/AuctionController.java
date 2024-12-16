@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auction")
+@RequestMapping("/auctions")
 public class AuctionController {
 
     private final AuctionService auctionService;

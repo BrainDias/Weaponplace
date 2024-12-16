@@ -32,6 +32,7 @@ public class UserController {
 	//Вернуть пользователей постранично для админа
 	@ResponseStatus(HttpStatus.FOUND)
 	@GetMapping("/users/admin")
+	@PreAuthorize("hasAuthority(ROLE_ADMIN)")
 	public Page<User> usersAdmin(@RequestParam int pageNum, @RequestParam int size){
 		Pageable pageable = PageRequest.of(pageNum, size);
 		return userService.pageUsers(pageable);

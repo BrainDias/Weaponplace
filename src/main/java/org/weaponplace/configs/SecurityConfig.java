@@ -2,8 +2,14 @@ package org.weaponplace.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,6 +26,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -36,26 +43,31 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authManager(HttpSecurity http, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder)
-                .and()
-                .build();
+    public AuthenticationManager authenticationManager(List<AuthenticationProvider> authenticationProviders) {
+        return new ProviderManager(authenticationProviders);
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(inMemoryUserDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
         return httpSecurity
-                .authorizeHttpRequests()
-                .requestMatchers("/control","/profile","/orders/**").hasRole("USER")
-                .and()
-                .formLogin()
-                .loginProcessingUrl("/auth")
-                .usernameParameter("Username")
-                .passwordParameter("Password")
-                .defaultSuccessUrl("/",true)
-                .and()
+                .authorizeHttpRequests((authorize)-> authorize
+                        .requestMatchers("/products/query",
+                                "/products/{id}",
+                                "orders/{id}",
+                                "/users",
+                                "/auctions").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(Customizer.withDefaults())
+                .logout(Customizer.withDefaults())
                 .build();
     }
 }

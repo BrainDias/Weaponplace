@@ -46,7 +46,7 @@ public class ProductController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PutMapping("")
+    @PutMapping("/")
     public void addProduct(@AuthenticationPrincipal User user, @RequestBody ProductDTO productDto){
         Product product = mapper.productDtoToProduct(productDto);
         productService.addProduct(user,product);

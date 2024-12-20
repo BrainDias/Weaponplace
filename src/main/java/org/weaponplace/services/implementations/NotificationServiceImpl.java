@@ -32,11 +32,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Value("${order.seller.text}")
     String sellerText;
 
-    @Value("${wishlist.added.notification.subject")
+    @Value("${wishlist.added.notification.subject}")
     String wishListSubject;
-    @Value("${wishlist.added.notification.before")
+    @Value("${wishlist.added.notification.before}")
     String wishNotificationBefore;
-    @Value("${wishlist.added.notification.after")
+    @Value("${wishlist.added.notification.after}")
     String wishNotificationAfter;
 
     public void notifyAuctionClosed(User owner, User pretender) throws MessagingException {

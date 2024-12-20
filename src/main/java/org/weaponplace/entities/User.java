@@ -1,5 +1,9 @@
 package org.weaponplace.entities;
 
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.weaponplace.filters.ProductFilter;
 import org.weaponplace.products.Product;
 import jakarta.persistence.*;
@@ -23,7 +27,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    //@SequenceGenerator(name = "user_seq", sequenceName = "users_id_seq")
     private Long id;
     private String username;
     private String password;
@@ -37,30 +42,29 @@ public class User implements UserDetails {
 
     private Boolean active;
     private Boolean orderHistoryHidden;
-    @ElementCollection
-    private Set<GrantedAuthority> authorities;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<String> authorities;
 
-    @ElementCollection
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Product> products;
 
-    @ElementCollection
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Product> wishList;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<ProductFilter> wishFilters;
-    @ElementCollection
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Product> wishNotifiedProducts;
 
-    @OneToMany(mappedBy = "buyer")
+    @OneToMany(mappedBy = "buyer", fetch = FetchType.EAGER)
     private List<ProductOrder> buyingOrders;
-    @OneToMany(mappedBy = "seller")
+    @OneToMany(mappedBy = "seller", fetch = FetchType.EAGER)
     private List<ProductOrder> sellingOrders;
 
-    @OneToMany(mappedBy = "owner")
-    private Set<Auction> ownedAuctions;
-    @OneToMany(mappedBy = "pretender")
-    private Set<Auction> pretendingAuctions;
+//    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER)
+//    private Set<Auction> ownedAuctions;
+//    @OneToMany(mappedBy = "pretender", fetch = FetchType.EAGER)
+//    private Set<Auction> pretendingAuctions;
 
-    @Lob
     private byte[] avatar;
 
     @CreatedDate
@@ -73,7 +77,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Верните список ролей или прав доступа пользователя
-        return authorities;
+        return authorities.stream().map(SimpleGrantedAuthority::new).toList();
     }
 
     @Override
@@ -96,5 +100,16 @@ public class User implements UserDetails {
         return active;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public byte[] getAvatar() {
+        return avatar;
+    }
 }
 

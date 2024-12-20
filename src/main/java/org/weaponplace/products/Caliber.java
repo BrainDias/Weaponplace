@@ -14,7 +14,7 @@ public enum Caliber {
 
     private final String caliber;
 
-    private Caliber(String caliber) {
+    Caliber(String caliber) {
         this.caliber = caliber;
     }
 

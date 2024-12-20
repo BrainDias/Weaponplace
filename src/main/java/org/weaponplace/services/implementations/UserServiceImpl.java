@@ -1,5 +1,7 @@
 package org.weaponplace.services.implementations;
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.weaponplace.entities.User;
 import org.weaponplace.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,15 +9,25 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.weaponplace.services.interfaces.UserService;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // Предполагаем, что у вас есть сущность User, которая реализует UserDetails
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // Возвращаем объект User, который является вашей JPA-сущностью и реализует UserDetails
+        return user;
+    }
 
     public Page<User> pageUsers(Pageable pageRequest){
         return userRepository.findAll(pageRequest);

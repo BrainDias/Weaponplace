@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 80
 spring:
   mail:
     host: smtp.gmail.com
@@ -12,12 +12,12 @@ spring:
           auth: true
           starttls: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5433/postgres
     username: postgres
     password: 4791355pDa
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
 auction:
   pretender:
     subject: "Вы выиграли аукцион"
@@ -36,3 +36,6 @@ order:
   seller:
     subject: ""
     text: ""
+logging:
+  level:
+    org.springframework.security.web.access: DEBUG

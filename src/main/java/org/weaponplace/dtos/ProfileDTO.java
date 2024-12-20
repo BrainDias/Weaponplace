@@ -9,7 +9,22 @@ public class ProfileDTO {
     //    @Email
     private String email;
     private Boolean active;
-    private Set<GrantedAuthority> Authorities;
 
     private byte[] avatar;
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public void setAvatar(byte[] avatar) {
+        this.avatar = avatar;
+    }
 }

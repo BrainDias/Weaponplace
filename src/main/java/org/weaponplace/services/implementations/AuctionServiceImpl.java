@@ -34,11 +34,6 @@ public class AuctionServiceImpl implements AuctionService {
         auction.setClosed(false);
         auctionRepository.save(auction);
     }
-    @Scheduled(fixedDelay = 1,timeUnit = TimeUnit.MINUTES)
-    public void closeAuctions(){
-        Streamable<Auction> auctionsToClose = (Streamable<Auction>) auctionRepository.findToClose();
-        endAuctions(auctionsToClose);
-    }
 
     @Transactional
     public void endAuctions(Streamable<Auction> auctionsToClose) {
@@ -62,6 +57,9 @@ public class AuctionServiceImpl implements AuctionService {
     }
 
     public List<Auction> currentAuctions(AuctionFilter filter) {
-        return auctionRepository.findAllByClosedIsFalse().stream().filter(auction -> filter.matches(auction)).toList();
+        return auctionRepository.findAllByClosedIsFalse()
+                .stream()
+                .filter(filter::matches)
+                .toList();
     }
 }

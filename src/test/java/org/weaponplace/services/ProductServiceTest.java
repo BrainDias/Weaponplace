@@ -106,7 +106,7 @@ public class ProductServiceTest {
         products.add(product);
         user.setProducts(products);
 
-        productService.updateProduct(user, 0, newProduct);
+        productService.updateProduct(user, newProduct);
 
         assertEquals(newProduct, user.getProducts().get(0));
         verify(userRepository).save(user);

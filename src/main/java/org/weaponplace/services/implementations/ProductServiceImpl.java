@@ -1,10 +1,14 @@
 package org.weaponplace.services.implementations;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.weaponplace.entities.User;
 import org.weaponplace.enums.SortingType;
 import org.weaponplace.filters.ProductFilter;
 import org.weaponplace.products.Product;
 import org.weaponplace.products.ProductType;
+import org.weaponplace.repositories.ProductRepository;
 import org.weaponplace.repositories.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.weaponplace.services.interfaces.ProductService;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -22,20 +27,28 @@ public class ProductServiceImpl implements ProductService {
     private final UserServiceImpl userService;
     private final UserRepository userRepository;
     private final NotificationServiceImpl notificationService;
+    private final ProductRepository productRepository;
 
     public void addProduct(User user, Product product) {
         user.getProducts().add(product);
         userRepository.save(user);
     }
 
-    public void deleteProduct(User user, int index) {
-        user.getProducts().remove(index);
-        userRepository.save(user);
+    public HttpStatus deleteProduct(User user, int id) {
+        if(user.getProducts().stream().mapToLong(Product::getId).anyMatch(i -> i == id)){
+            productRepository.deleteById((long) id);
+            productRepository.flush();
+            return HttpStatus.NO_CONTENT;
+        }
+        else return HttpStatus.FORBIDDEN;
     }
 
-    public void updateProduct(User user, int index, Product product) {
-        user.getProducts().set(index,product);
-        userRepository.save(user);
+    public HttpStatus updateProduct(User user, Product product) {
+        if(user.getProducts().stream().mapToLong(Product::getId).anyMatch(i -> i == product.getId())) {
+            productRepository.saveAndFlush(product);
+            return HttpStatus.ACCEPTED;
+        }
+        else return HttpStatus.FORBIDDEN;
     }
     @Cacheable("products")
     public List<Product> otherUserProducts(Long id, ProductType productType) {
@@ -45,7 +58,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public List<Product> mapToType(User user, ProductType productType) {
-        return user.getProducts().stream().filter(procuct->procuct.getProductType().equals(productType) && !procuct.isHidden()).toList();
+        List<Product> products = user.getProducts();
+        return products.stream().filter(product->product.getProductType().equals(productType) && !product.isHidden()).toList();
     }
 
     public void addToWishList(User wisher, int index, Long sellerId) {
@@ -74,18 +88,22 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public List<Product> filteredProducts(ProductFilter filter, int pageNum, int size, SortingType sortingType) {
-        List<Product> products = userRepository.findAllByActiveIsTrue().stream()
-                .flatMap(user -> user.getProducts().stream())
-                .filter(Product::isForSale)
+        Pageable pageable = PageRequest.of(pageNum,size);
+        List<Product> products = productRepository.findAllByForSaleIsTrue(pageable).stream()
                 .filter(filter::matches)
-                .skip(pageNum * (size - 1))
-                .limit(size)
+                .sorted(getComparator(sortingType))
                 .toList();
-        switch (sortingType){
-            case NEW -> products.sort((product1,product2)->product1.getCreatedAt().compareTo(product2.getCreatedAt()));
-            case PRICE_ASC -> products.sort((product1,product2)->product1.getPrice().compareTo(product2.getPrice()));
-            case PRICE_DESC -> products.sort((product1,product2)->product2.getPrice().compareTo(product1.getPrice()));
-        }
         return products;
+    }
+
+    private Comparator<Product> getComparator(SortingType sortingType) {
+        return switch (sortingType) {
+            case NEW -> Comparator.comparing(Product::getCreatedAt,
+                    Comparator.nullsLast(Comparator.naturalOrder()));
+            case PRICE_ASC -> Comparator.comparing(Product::getPrice,
+                    Comparator.nullsLast(Comparator.naturalOrder()));
+            case PRICE_DESC -> Comparator.comparing(Product::getPrice,
+                    Comparator.nullsLast(Comparator.naturalOrder())).reversed();
+        };
     }
 }

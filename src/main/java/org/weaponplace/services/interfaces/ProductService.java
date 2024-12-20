@@ -2,6 +2,7 @@ package org.weaponplace.services.interfaces;
 
 import jakarta.mail.MessagingException;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.weaponplace.entities.User;
 import org.weaponplace.enums.SortingType;
@@ -16,11 +17,10 @@ public interface ProductService {
 
     void addProduct(User user, Product product);
 
-    void deleteProduct(User user, int index);
+    HttpStatus deleteProduct(User user, int index);
 
-    void updateProduct(User user, int index, Product product);
+    HttpStatus updateProduct(User user, Product product);
 
-    @Cacheable("products")
     List<Product> otherUserProducts(Long id, ProductType productType);
 
     List<Product> mapToType(User user, ProductType productType);

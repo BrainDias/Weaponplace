@@ -20,7 +20,6 @@ ext {
 dependencies {
 	//Persistence
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-	implementation 'org.flywaydb:flyway-core:11.1.0'
 	runtimeOnly 'org.flywaydb:flyway-database-postgresql:11.1.0'
 
 
@@ -31,7 +30,7 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.springframework.boot:spring-boot-starter-security:3.4.0'
-	implementation 'org.postgresql:postgresql:42.7.3'
+	implementation 'org.postgresql:postgresql:42.7.4'
 
 	//Mapstruct
     implementation 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.0.1'
@@ -60,7 +59,8 @@ tasks.named('test') {
 }
 
 flyway {
-	url = 'jdbc:postgresql://localhost:5432/postgres'
+	url = 'jdbc:postgresql://localhost:5433/postgres'
+	driver = 'org.postgresql.Driver'
 	user = 'postgres'
 	password = '4791355pDa'
 	locations = ['classpath:db/migration']

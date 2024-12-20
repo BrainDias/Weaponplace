@@ -13,21 +13,21 @@ import java.util.List;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Table(name = "auctions")
 @Data
 @NoArgsConstructor
 public class Auction {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    //@SequenceGenerator(name = "auction_seq", sequenceName = "auctions_id_seq")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id")
     User owner;
     @ManyToOne
-    @JoinColumn(name = "pretender_id")
     User pretender;
 
-    @ElementCollection
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
 
     private Boolean closed;
@@ -49,4 +49,52 @@ public class Auction {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Instant closingAt;
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+
+    public Float getStartPrice() {
+        return startPrice;
+    }
+
+    public void setStartPrice(Float startPrice) {
+        this.startPrice = startPrice;
+    }
+
+    public Float getPriceStep() {
+        return priceStep;
+    }
+
+    public void setPriceStep(Float priceStep) {
+        this.priceStep = priceStep;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Instant getClosingAt() {
+        return closingAt;
+    }
+
+    public void setClosingAt(Instant closingAt) {
+        this.closingAt = closingAt;
+    }
 }

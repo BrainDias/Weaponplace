@@ -1,9 +1,8 @@
 package org.weaponplace.entities;
 
+import lombok.*;
 import org.weaponplace.products.Product;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -13,11 +12,15 @@ import java.util.List;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Data
+@Table(name = "product_orders")
+@Getter
+@Setter
+//@ToString(exclude = {"buyer","seller"})
 @NoArgsConstructor
 public class ProductOrder {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    //@SequenceGenerator(name = "order_seq", sequenceName = "orders_id_seq")
     private Long id;
 
     @ManyToOne
@@ -27,7 +30,7 @@ public class ProductOrder {
             @JoinColumn(name = "seller_id")
     private User seller;
 
-    @ElementCollection
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Product> products;
 
     Float price;
@@ -42,4 +45,24 @@ public class ProductOrder {
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     private Instant updatedAt;
+
+    public User getBuyer() {
+        return buyer;
+    }
+
+    public User getSeller() {
+        return seller;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Float getPrice() {
+        return price;
+    }
 }

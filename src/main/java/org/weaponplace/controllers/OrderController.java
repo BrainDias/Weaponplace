@@ -1,5 +1,6 @@
 package org.weaponplace.controllers;
 
+import org.springframework.data.domain.Pageable;
 import org.weaponplace.dtos.ProductOrderDTO;
 import org.weaponplace.entities.ProductOrder;
 import org.weaponplace.entities.User;
@@ -30,28 +31,31 @@ public class OrderController {
     //Подтверждаем доставку
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PatchMapping("/delivered/{id}")
+    //TODO: обработать случай обращения от чужого пользователя
     public void closeOrder(@AuthenticationPrincipal User user, @PathVariable Long id){
         orderService.closeOrder(id,user);
     }
 
     //Заказы данного пользователя
-    @ResponseStatus(HttpStatus.FOUND)
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/buying")
     public List<ProductOrderDTO> currentUserBuyingOrders(@AuthenticationPrincipal User currentUser){
         return mapCollectionToDto(currentUser.getBuyingOrders());
     }
 
-    @ResponseStatus(HttpStatus.FOUND)
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/selling")
     public List<ProductOrderDTO> currentUserSellingOrders(@AuthenticationPrincipal User currentUser){
         return mapCollectionToDto(currentUser.getSellingOrders());
     }
 
-    @ResponseStatus(HttpStatus.FOUND)
-    @PreAuthorize("hasAuthority(ROLE_ADMIN)")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/admin")
-    public Page<ProductOrder> ordersAdmin(@RequestBody PageRequest pageRequest){
-        return orderService.pageOrders(pageRequest);
+    public List<ProductOrderDTO> ordersAdmin(@RequestParam int pageNum, @RequestParam int size){
+        Pageable pageable = PageRequest.of(pageNum, size);
+        Page<ProductOrder> productOrders = orderService.pageOrders(pageable);
+        return productOrders.map(mapper::orderToDto).toList();
     }
 
     //Посмотреть проданные товары выбранного пользователя, если он разрешил такой просмотр
@@ -60,26 +64,27 @@ public class OrderController {
         Optional<List<ProductOrder>> productOrders = orderService.selectedUserOrdersHistory(id);
         if(productOrders.isEmpty()) return new ResponseEntity<>(HttpStatus.LOCKED);
         List<ProductOrderDTO> dtos = mapCollectionToDto(productOrders.get());
-        return new ResponseEntity<>(dtos,HttpStatus.FOUND);
+        return new ResponseEntity<>(dtos,HttpStatus.OK);
     }
 
     @PostMapping("/{sellerId}")
-    public HttpStatusCode makeOrder(@AuthenticationPrincipal User buyer, @PathVariable Long sellerId, @RequestBody List<Product> products ) throws MessagingException {
-        return orderService.makeOrder(buyer,products, sellerId);
+    public HttpStatusCode makeOrder(@AuthenticationPrincipal User buyer,
+                                    @PathVariable Long sellerId,
+                                    @RequestBody List<Long> productIds ) throws MessagingException {
+        return orderService.makeOrder(buyer,productIds, sellerId);
     }
 
     @PatchMapping("/{orderId}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void confirmOrder(@AuthenticationPrincipal User seller, @PathVariable Long orderId){
-        orderService.confirmOrder(seller,orderId);
+    public HttpStatus confirmOrder(@AuthenticationPrincipal User seller, @PathVariable Long orderId){
+        return orderService.confirmOrder(seller,orderId);
     }
 
     @DeleteMapping("/{orderId}")
-    public void cancelOrder(@AuthenticationPrincipal User buyerOrSeller, @PathVariable Long orderId){
-        orderService.cancelOrder(buyerOrSeller,orderId);
+    public HttpStatus cancelOrder(@AuthenticationPrincipal User buyerOrSeller, @PathVariable Long orderId){
+        return orderService.cancelOrder(buyerOrSeller,orderId);
     }
 
     List<ProductOrderDTO> mapCollectionToDto(Collection<ProductOrder> orders){
-        return orders.stream().map(order -> mapper.orderToDto(order)).toList();
+        return orders.stream().map(mapper::orderToDto).toList();
     }
 }

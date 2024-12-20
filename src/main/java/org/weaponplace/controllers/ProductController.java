@@ -24,25 +24,31 @@ public class ProductController {
     private final DtoMapper mapper;
 
     @GetMapping("/query")
-    public List<Product> filteredProducts(@RequestBody ProductFilter filter, @RequestParam int pageNum,
+    public List<ProductDTO> filteredProducts(@RequestBody ProductFilter filter, @RequestParam int pageNum,
                                           @RequestParam int size, @RequestParam SortingType sortingType){
-        return productService.filteredProducts(filter,pageNum,size,sortingType);
+        return productService.filteredProducts(filter,pageNum,size,sortingType)
+                .stream()
+                .map(mapper::productToDto)
+                .toList();
     }
 
     @SneakyThrows
-    @GetMapping("/")
-    public List<Product> currentUserProducts(@AuthenticationPrincipal User user, @RequestParam ProductType productType){
-        return productService.mapToType(user, productType);
+    @GetMapping("")
+    public List<ProductDTO> currentUserProducts(@AuthenticationPrincipal User user, @RequestParam ProductType productType){
+        List<Product> products = productService.mapToType(user, productType);
+        return products.stream().map(mapper::productToDto).toList();
     }
 
     @GetMapping("/wishlist")
-    public List<Product> wishlist(@AuthenticationPrincipal User user){
-        return user.getWishList();
+    public List<ProductDTO> wishlist(@AuthenticationPrincipal User user){
+        List<Product> wishList = user.getWishList();
+        return wishList.stream().map(mapper::productToDto).toList();
     }
 
     @GetMapping("/{id}")
-    public List<Product> otherUserProducts(@PathVariable Long id,@RequestParam ProductType productType){
-        return productService.otherUserProducts(id,productType);
+    public List<ProductDTO> otherUserProducts(@PathVariable Long id,@RequestParam ProductType productType){
+        List<Product> products = productService.otherUserProducts(id, productType);
+        return products.stream().map(mapper::productToDto).toList();
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -52,17 +58,15 @@ public class ProductController {
         productService.addProduct(user,product);
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{index}")
-    public void deleteProduct(@AuthenticationPrincipal User user, @PathVariable int index) {
-        productService.deleteProduct(user, index);
+    @DeleteMapping("/{id}")
+    public HttpStatus deleteProduct(@AuthenticationPrincipal User user, @PathVariable int id) {
+        return productService.deleteProduct(user, id);
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @PatchMapping("/{index}")
-    public void updateProduct(@AuthenticationPrincipal User user,@PathVariable int index,@RequestBody ProductDTO productDto){
+    @PatchMapping("/")
+    public HttpStatus updateProduct(@AuthenticationPrincipal User user, @RequestBody ProductDTO productDto){
         Product product = mapper.productDtoToProduct(productDto);
-        productService.updateProduct(user, index,product);
+        return productService.updateProduct(user, product);
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)

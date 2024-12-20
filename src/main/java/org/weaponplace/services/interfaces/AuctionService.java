@@ -13,8 +13,6 @@ public interface AuctionService {
     @Transactional
     void createAuction(User owner, Auction auction);
 
-    void closeAuctions();
-
     @Transactional
     void endAuctions(Streamable<Auction> auctionsToClose);
 

@@ -33,12 +33,12 @@ public class AuctionController {
         auctionService.placeBidToAuction(pretender,price, auctionId);
     }
 
-    @ResponseStatus(HttpStatus.FOUND)
-    @GetMapping("/")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("")
     public List<AuctionDTO> currentAuctions(@RequestBody AuctionFilter filter){
         return auctionService.currentAuctions(filter)
                 .stream()
-                .map(auction -> mapper.auctionToAuctionDto(auction))
+                .map(mapper::auctionToAuctionDto)
                 .toList();
     }
 }
